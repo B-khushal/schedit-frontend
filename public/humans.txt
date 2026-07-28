@@ -1,0 +1,6 @@
+SCHEDIT
+Site: https://schedit.in
+Support: support@schedit.in
+Security: security@schedit.in
+Privacy: privacy@schedit.in
+Built for secure Meta publishing, scheduling, approvals, and analytics.

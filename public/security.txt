@@ -1,0 +1,4 @@
+Contact: mailto:security@schedit.in
+Policy: https://schedit.in/security
+Preferred-Languages: en
+Canonical: https://schedit.in/.well-known/security.txt
