@@ -10,8 +10,8 @@ export function Pricing() {
   const plans = [
     {
       name: 'Creator / Starter',
-      monthlyPrice: '₹399',
-      annualPrice: '₹319',
+      monthlyPrice: '₹2499',
+      annualPrice: '₹2099',
       desc: 'Essential auto-publishing & AI tools for solo creators and freelancers.',
       features: [
         '5 Connected Social Accounts',
@@ -26,8 +26,8 @@ export function Pricing() {
     },
     {
       name: 'Professional / Agency',
-      monthlyPrice: '₹899',
-      annualPrice: '₹719',
+      monthlyPrice: '₹4899',
+      annualPrice: '₹4099',
       desc: 'For growing marketing agencies and multi-brand content teams.',
       features: [
         '20 Connected Social Accounts',
@@ -44,8 +44,8 @@ export function Pricing() {
     },
     {
       name: 'Enterprise Scale',
-      monthlyPrice: '₹1,299',
-      annualPrice: '₹1,039',
+      monthlyPrice: '₹10,299',
+      annualPrice: '₹10,000',
       desc: 'Unlimited power, dedicated white-label client portal & SLA guarantee.',
       features: [
         'Unlimited Connected Accounts',
