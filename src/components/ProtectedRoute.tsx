@@ -6,8 +6,11 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+const AUTH_DEBUG =
+  import.meta.env.DEV || import.meta.env.VITE_AUTH_DEBUG === 'true';
+
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, token, user } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -28,6 +31,15 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
+    if (AUTH_DEBUG) {
+      console.info('[auth]', 'redirect-to-login', {
+        at: new Date().toISOString(),
+        reason: !token ? 'No token' : 'User null',
+        hasToken: Boolean(token),
+        hasUser: Boolean(user),
+        from: location.pathname,
+      });
+    }
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

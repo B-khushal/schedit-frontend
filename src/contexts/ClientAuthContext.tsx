@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { clientApiRequest } from '../lib/api';
 
 interface ClientUser {
@@ -29,6 +30,40 @@ interface ClientAuthContextType {
 
 const ClientAuthContext = createContext<ClientAuthContextType | undefined>(undefined);
 
+type StoredClientAuth = {
+  token: string | null;
+  user: ClientUser | null;
+  client: ClientInfo | null;
+};
+
+function clearStoredClientAuth() {
+  localStorage.removeItem('client_token');
+  localStorage.removeItem('client_refresh_token');
+  localStorage.removeItem('client_user');
+  localStorage.removeItem('client_info');
+}
+
+function readStoredClientAuth(): StoredClientAuth {
+  try {
+    const savedToken = localStorage.getItem('client_token');
+    const savedUser = localStorage.getItem('client_user');
+    const savedClient = localStorage.getItem('client_info');
+
+    if (!savedToken || !savedUser) {
+      return { token: null, user: null, client: null };
+    }
+
+    return {
+      token: savedToken,
+      user: JSON.parse(savedUser),
+      client: savedClient ? JSON.parse(savedClient) : null,
+    };
+  } catch {
+    clearStoredClientAuth();
+    return { token: null, user: null, client: null };
+  }
+}
+
 export function useClientAuth() {
   const ctx = useContext(ClientAuthContext);
   if (!ctx) throw new Error('useClientAuth must be used within ClientAuthProvider');
@@ -36,30 +71,45 @@ export function useClientAuth() {
 }
 
 export function ClientAuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<ClientUser | null>(null);
-  const [client, setClient] = useState<ClientInfo | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [initialAuth] = useState(readStoredClientAuth);
+  const [user, setUser] = useState<ClientUser | null>(initialAuth.user);
+  const [client, setClient] = useState<ClientInfo | null>(initialAuth.client);
+  const [token, setToken] = useState<string | null>(initialAuth.token);
+  const [isLoading] = useState(false);
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
-    try {
-      const savedToken = localStorage.getItem('client_token');
-      const savedUser = localStorage.getItem('client_user');
-      const savedClient = localStorage.getItem('client_info');
-      if (savedToken && savedUser) {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-        if (savedClient) setClient(JSON.parse(savedClient));
+    const handleTokenRefreshed = (event: Event) => {
+      const detail = (event as CustomEvent<{ accessToken: string }>).detail;
+      if (!detail?.accessToken) return;
+      setToken(detail.accessToken);
+    };
+
+    const handleSessionExpired = (event: Event) => {
+      const detail = (event as CustomEvent<{ reason?: string }>).detail || {};
+      const reason = detail.reason || 'Client session expired';
+
+      setToken(null);
+      setUser(null);
+      setClient(null);
+
+      if (!location.pathname.includes('/client/login')) {
+        navigate('/client/login', {
+          state: { from: location, reason },
+          replace: true,
+        });
       }
-    } catch {
-      localStorage.removeItem('client_token');
-      localStorage.removeItem('client_user');
-      localStorage.removeItem('client_info');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    };
+
+    window.addEventListener('schedit-client-auth-token-refreshed', handleTokenRefreshed);
+    window.addEventListener('schedit-client-auth-session-expired', handleSessionExpired);
+
+    return () => {
+      window.removeEventListener('schedit-client-auth-token-refreshed', handleTokenRefreshed);
+      window.removeEventListener('schedit-client-auth-session-expired', handleSessionExpired);
+    };
+  }, [location, navigate]);
 
   const login = useCallback(async (email: string, password: string) => {
     const response = await clientApiRequest<{
@@ -70,6 +120,7 @@ export function ClientAuthProvider({ children }: { children: React.ReactNode }) 
     }>('/api/v1/clients/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
+      skipAuthRefresh: true,
     });
 
     const { accessToken, refreshToken, user: userData, client: clientData } = response;
@@ -90,16 +141,14 @@ export function ClientAuthProvider({ children }: { children: React.ReactNode }) 
       clientApiRequest('/api/v1/clients/me/logout', {
         method: 'POST',
         body: JSON.stringify({ refreshToken }),
+        skipAuthRefresh: true,
       }).catch(() => {});
     }
 
     setToken(null);
     setUser(null);
     setClient(null);
-    localStorage.removeItem('client_token');
-    localStorage.removeItem('client_refresh_token');
-    localStorage.removeItem('client_user');
-    localStorage.removeItem('client_info');
+    clearStoredClientAuth();
   }, []);
 
   const updateUser = useCallback((updatedUser: ClientUser) => {

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { apiRequest } from '../lib/api';
 
 export interface User {
@@ -32,6 +33,74 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+type StoredAuth = {
+  token: string | null;
+  user: User | null;
+  isImpersonating: boolean;
+};
+
+const AUTH_DEBUG =
+  import.meta.env.DEV || import.meta.env.VITE_AUTH_DEBUG === 'true';
+
+function authLog(event: string, meta: Record<string, unknown> = {}) {
+  if (!AUTH_DEBUG) return;
+  console.info('[auth]', event, {
+    at: new Date().toISOString(),
+    ...meta,
+  });
+}
+
+function clearStoredAuth() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+  localStorage.removeItem('admin_original_token');
+  localStorage.removeItem('admin_original_user');
+}
+
+function readStoredAuth(): StoredAuth {
+  try {
+    const savedToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    const savedImpToken = localStorage.getItem('admin_original_token');
+
+    if (!savedToken || !savedUser) {
+      authLog('hydrate-empty', {
+        hasToken: Boolean(savedToken),
+        hasUser: Boolean(savedUser),
+      });
+      return {
+        token: null,
+        user: null,
+        isImpersonating: Boolean(savedImpToken),
+      };
+    }
+
+    const parsedUser = JSON.parse(savedUser) as User;
+    authLog('hydrate-success', {
+      hasToken: true,
+      userId: parsedUser.id,
+      email: parsedUser.email,
+    });
+
+    return {
+      token: savedToken,
+      user: parsedUser,
+      isImpersonating: Boolean(savedImpToken),
+    };
+  } catch (error) {
+    authLog('hydrate-failed', {
+      reason: error instanceof Error ? error.message : 'Invalid stored auth',
+    });
+    clearStoredAuth();
+    return {
+      token: null,
+      user: null,
+      isImpersonating: false,
+    };
+  }
+}
+
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
@@ -39,39 +108,61 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isImpersonating, setIsImpersonating] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [initialAuth] = useState(readStoredAuth);
+  const [user, setUser] = useState<User | null>(initialAuth.user);
+  const [token, setToken] = useState<string | null>(initialAuth.token);
+  const [isLoading] = useState(false);
+  const [isImpersonating, setIsImpersonating] = useState(initialAuth.isImpersonating);
   const [impersonatedUser, setImpersonatedUser] = useState<User | null>(null);
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
-    try {
-      const savedToken = localStorage.getItem('token');
-      const savedUser = localStorage.getItem('user');
-      const savedImpToken = localStorage.getItem('admin_original_token');
+    const handleTokenRefreshed = (event: Event) => {
+      const detail = (event as CustomEvent<{ accessToken: string }>).detail;
+      if (!detail?.accessToken) return;
+      authLog('token-refreshed-state-sync', { hasToken: true });
+      setToken(detail.accessToken);
+    };
 
-      if (savedImpToken) {
-        setIsImpersonating(true);
-      }
+    const handleSessionExpired = (event: Event) => {
+      const detail = (event as CustomEvent<{ reason?: string; path?: string; status?: number }>).detail || {};
+      const reason = detail.reason || 'Session expired';
 
-      if (savedToken && savedUser) {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
+      authLog('redirect-to-login', {
+        reason,
+        path: detail.path,
+        status: detail.status,
+        from: location.pathname,
+      });
+
+      setToken(null);
+      setUser(null);
+      setIsImpersonating(false);
+      setImpersonatedUser(null);
+
+      if (!location.pathname.includes('/login')) {
+        navigate('/login', {
+          state: { from: location, reason },
+          replace: true,
+        });
       }
-    } catch {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    };
+
+    window.addEventListener('schedit-auth-token-refreshed', handleTokenRefreshed);
+    window.addEventListener('schedit-auth-session-expired', handleSessionExpired);
+
+    return () => {
+      window.removeEventListener('schedit-auth-token-refreshed', handleTokenRefreshed);
+      window.removeEventListener('schedit-auth-session-expired', handleSessionExpired);
+    };
+  }, [location, navigate]);
 
   const login = useCallback(async (email: string, password: string) => {
+    authLog('login-start', { email: email.toLowerCase() });
     const response = await apiRequest<{ accessToken: string; refreshToken: string; user: User }>(
       '/api/v1/auth/login',
-      { method: 'POST', body: JSON.stringify({ email, password }) }
+      { method: 'POST', body: JSON.stringify({ email, password }), skipAuthRefresh: true }
     );
 
     const { accessToken, refreshToken, user: userData } = response;
@@ -81,6 +172,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('token', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('user', JSON.stringify(userData));
+    authLog('login-success-token-stored', {
+      userId: userData.id,
+      email: userData.email,
+      hasAccessToken: Boolean(accessToken),
+      hasRefreshToken: Boolean(refreshToken),
+    });
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
@@ -97,6 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       apiRequest('/api/v1/auth/logout', {
         method: 'POST',
         body: JSON.stringify({ refreshToken }),
+        skipAuthRefresh: true,
       }).catch(() => {});
     }
 
@@ -104,11 +202,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setIsImpersonating(false);
     setImpersonatedUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    localStorage.removeItem('admin_original_token');
-    localStorage.removeItem('admin_original_user');
+    clearStoredAuth();
+    authLog('logout-complete', { reason: 'User initiated logout' });
   }, []);
 
   const updateUser = useCallback((updatedUser: User) => {

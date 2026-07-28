@@ -6,8 +6,11 @@ interface ClientProtectedRouteProps {
   children: React.ReactNode;
 }
 
+const AUTH_DEBUG =
+  import.meta.env.DEV || import.meta.env.VITE_AUTH_DEBUG === 'true';
+
 export function ClientProtectedRoute({ children }: ClientProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useClientAuth();
+  const { isAuthenticated, isLoading, token, user } = useClientAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -29,6 +32,15 @@ export function ClientProtectedRoute({ children }: ClientProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
+    if (AUTH_DEBUG) {
+      console.info('[auth]', 'redirect-to-client-login', {
+        at: new Date().toISOString(),
+        reason: !token ? 'No client token' : 'Client user null',
+        hasToken: Boolean(token),
+        hasUser: Boolean(user),
+        from: location.pathname,
+      });
+    }
     return <Navigate to="/client/login" state={{ from: location }} replace />;
   }
 

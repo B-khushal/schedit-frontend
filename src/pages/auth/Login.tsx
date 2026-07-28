@@ -26,6 +26,13 @@ export function Login() {
     try {
       await login(email, password);
       toastSuccess('Welcome back!', 'Successfully signed into your account.');
+      if (import.meta.env.DEV || import.meta.env.VITE_AUTH_DEBUG === 'true') {
+        console.info('[auth]', 'navigate-after-login', {
+          at: new Date().toISOString(),
+          to: from,
+          reason: 'Login successful',
+        });
+      }
       navigate(from, { replace: true });
     } catch (err: any) {
       const msg = err.message || 'Invalid email address or password. Please try again.';
