@@ -62,6 +62,8 @@ export function ConnectedApps() {
       if (event.data?.type === 'META_AUTH_SUCCESS') {
         loadProjectDetails();
         toastSuccess('App Connected', 'Social account has been synced to your project workspace.');
+      } else if (event.data?.type === 'META_AUTH_ERROR') {
+        toastError('Meta Connection Failed', event.data.error || 'Could not fetch accounts from Meta.');
       }
     };
     window.addEventListener('message', handleMessage);
