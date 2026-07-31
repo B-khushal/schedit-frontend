@@ -12,8 +12,8 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, breadcrumbs, actions, className }: PageHeaderProps) {
   return (
-    <div className={cn('flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4', className)}>
-      <div className="min-w-0 w-full sm:w-auto">
+    <div className={cn('flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 flex-wrap', className)}>
+      <div className="min-w-0 flex-1 w-full sm:w-auto">
         {breadcrumbs && breadcrumbs.length > 0 && (
           <nav className="flex items-center gap-1 text-sm text-gray-500 mb-2 overflow-x-auto scrollbar-hide">
             {breadcrumbs.map((crumb, i) => (
