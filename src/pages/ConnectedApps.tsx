@@ -228,45 +228,45 @@ export function ConnectedApps() {
                       placeholder="Search Instagram profiles..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 text-gray-800 placeholder:text-gray-400 shadow-sm transition-all"
+                      className="w-full pl-9 pr-4 py-2 neu-input text-xs text-[var(--neu-text-primary)] placeholder:text-[var(--neu-text-muted)] focus:outline-none transition-all"
                     />
                   </div>
                 )}
               </div>
 
               {selectingId && (
-                <div className="flex items-center justify-center p-6 bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200 shadow-sm animate-pulse">
-                  <RefreshCw className="w-5 h-5 animate-spin text-brand-500 mr-2" />
-                  <span className="text-xs font-semibold text-gray-700">Updating active account link...</span>
+                <div className="flex items-center justify-center p-6 neu-well rounded-2xl animate-pulse">
+                  <RefreshCw className="w-5 h-5 animate-spin text-blue-500 mr-2" />
+                  <span className="text-xs font-bold text-[var(--neu-text-secondary)]">Updating active account link...</span>
                 </div>
               )}
 
               {instagramAccounts.length === 0 ? (
                 /* Meta Connected but No Instagram Account Empty State */
-                <div className="bg-white border border-slate-200/80 rounded-2xl p-8 max-w-2xl mx-auto shadow-sm text-center space-y-6">
-                  <div className="w-16 h-16 bg-rose-50 border border-rose-100 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-sm">
+                <div className="neu-card p-8 max-w-2xl mx-auto text-center space-y-6">
+                  <div className="w-16 h-16 neu-inset rounded-2xl flex items-center justify-center mx-auto text-rose-500">
                     <ShieldAlert className="w-8 h-8 animate-pulse" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-base font-bold text-gray-900">No Linked Instagram Professional Accounts Found</h3>
-                    <p className="text-xs text-gray-600 max-w-md mx-auto leading-relaxed">
+                    <h3 className="text-base font-bold text-[var(--neu-text-primary)]">No Linked Instagram Professional Accounts Found</h3>
+                    <p className="text-xs text-[var(--neu-text-secondary)] max-w-md mx-auto leading-relaxed">
                       We found your Facebook connection, but there are no eligible Instagram Business or Creator accounts linked to any of your managed Facebook Pages.
                     </p>
                   </div>
 
-                  <div className="bg-slate-50 border border-slate-150 rounded-xl p-5 text-left text-xs space-y-4">
-                    <h4 className="font-bold text-gray-800 flex items-center gap-1.5 border-b border-slate-200 pb-2">
-                      <Info className="w-4 h-4 text-brand-500" />
+                  <div className="neu-well p-5 text-left text-xs space-y-4">
+                    <h4 className="font-bold text-[var(--neu-text-primary)] flex items-center gap-1.5 border-b border-[var(--neu-border-inset)]/50 pb-2">
+                      <Info className="w-4 h-4 text-blue-500" />
                       How to convert and link your Instagram account:
                     </h4>
-                    <ol className="list-decimal pl-4 space-y-3.5 text-gray-700">
+                    <ol className="list-decimal pl-4 space-y-3.5 text-[var(--neu-text-secondary)]">
                       <li>
-                        <strong className="text-gray-900 block mb-0.5">Switch to a Professional Account</strong>
-                        Open the Instagram app on your mobile device, go to <span className="font-semibold text-gray-900">Settings &gt; Account Type and Tools</span>, and switch to either a <span className="font-semibold text-gray-900">Business</span> or <span className="font-semibold text-gray-900">Creator</span> account.
+                        <strong className="text-[var(--neu-text-primary)] block mb-0.5">Switch to a Professional Account</strong>
+                        Open the Instagram app on your mobile device, go to <span className="font-semibold text-[var(--neu-text-primary)]">Settings &gt; Account Type and Tools</span>, and switch to either a <span className="font-semibold text-[var(--neu-text-primary)]">Business</span> or <span className="font-semibold text-[var(--neu-text-primary)]">Creator</span> account.
                       </li>
                       <li>
-                        <strong className="text-gray-900 block mb-0.5">Link Instagram to your Facebook Page</strong>
-                        Go to your Facebook Page, navigate to <span className="font-semibold text-gray-900">Settings &gt; Linked Accounts &gt; Instagram</span>, and connect your Instagram account there.
+                        <strong className="text-[var(--neu-text-primary)] block mb-0.5">Link Instagram to your Facebook Page</strong>
+                        Go to your Facebook Page, navigate to <span className="font-semibold text-[var(--neu-text-primary)]">Settings &gt; Linked Accounts &gt; Instagram</span>, and connect your Instagram account there.
                       </li>
                       <li>
                         <strong className="text-gray-900 block mb-0.5">Reconnect with Permissions</strong>
@@ -312,13 +312,13 @@ export function ConnectedApps() {
                           transition={{ delay: i * 0.05 }}
                           onClick={() => !isActive && handleSelectAccount(app.platformAccountId)}
                           className={cn(
-                            "bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col relative cursor-pointer group",
+                            "neu-card rounded-2xl overflow-hidden transition-all flex flex-col relative cursor-pointer group",
                             isActive 
-                              ? "border-brand-500 ring-2 ring-brand-500/10 bg-brand-50/5" 
-                              : "border-gray-200 hover:border-gray-300"
+                              ? "border-blue-500 ring-2 ring-blue-500/20" 
+                              : "hover:scale-[1.01]"
                           )}
                         >
-                          <div className={cn("h-1.5 w-full", isActive ? "bg-brand-500" : "bg-gray-200")} />
+                          <div className={cn("h-1.5 w-full", isActive ? "bg-blue-500" : "bg-[var(--neu-border-inset)]/50")} />
                           
                           <div className="p-4 sm:p-6 flex-1 flex flex-col justify-between">
                             <div>

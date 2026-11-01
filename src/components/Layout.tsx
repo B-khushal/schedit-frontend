@@ -21,25 +21,37 @@ export function Layout() {
   useKeyboard('ctrl+k', () => setSearchOpen(true));
 
   let title = 'Dashboard';
-  if (location.pathname.includes('/calendar')) title = 'Content Calendar';
-  if (location.pathname.includes('/studio')) title = 'Content Studio';
-  if (location.pathname.includes('/workflow')) title = 'Content Workflow';
-  if (location.pathname.includes('/analytics')) title = 'Analytics Report';
-  if (location.pathname.includes('/ai')) title = 'AI Assistant';
-  if (location.pathname.includes('/media')) title = 'Media Library';
-  if (location.pathname.includes('/team')) title = 'Team Management';
-  if (location.pathname.includes('/billing')) title = 'Billing & Subscriptions';
-  if (location.pathname.includes('/settings')) title = 'Workspace Settings';
-  if (location.pathname.includes('/projects')) title = 'Projects';
-  if (location.pathname.includes('/notifications')) title = 'Notifications Center';
-  if (location.pathname.includes('/admin')) title = 'Platform Admin Portal';
+  if (location.pathname.includes('/ai/strategy')) title = 'AI Strategy';
+  else if (location.pathname.includes('/ai/content-planner')) title = 'AI Content Planner';
+  else if (location.pathname.includes('/ai/creative-studio')) title = 'AI Creative Studio';
+  else if (location.pathname.includes('/ai/automation/workflows')) title = 'Visual Workflow Builder';
+  else if (location.pathname.includes('/ai/automation')) title = 'Autonomy Control Center';
+  else if (location.pathname.includes('/ai/approvals')) title = 'Approval Center';
+  else if (location.pathname.includes('/ai/activity')) title = 'AI Activity Logs';
+  else if (location.pathname.includes('/ai/business-memory')) title = 'Business Memory';
+  else if (location.pathname.includes('/ai')) title = 'AI Command Center';
+  else if (location.pathname.includes('/ads')) title = 'Ads Command Center';
+  else if (location.pathname.includes('/calendar')) title = 'Content Calendar';
+  else if (location.pathname.includes('/studio')) title = 'Content Studio';
+  else if (location.pathname.includes('/workflow')) title = 'Content Workflow';
+  else if (location.pathname.includes('/analytics')) title = 'Performance Analytics';
+  else if (location.pathname.includes('/reports')) title = 'Marketing Reports';
+  else if (location.pathname.includes('/recommendations')) title = 'AI Recommendations';
+  else if (location.pathname.includes('/media')) title = 'Media Library';
+  else if (location.pathname.includes('/team')) title = 'Team & Permissions';
+  else if (location.pathname.includes('/billing')) title = 'Billing & Subscriptions';
+  else if (location.pathname.includes('/settings')) title = 'Workspace Settings';
+  else if (location.pathname.includes('/projects')) title = 'Projects';
+  else if (location.pathname.includes('/clients')) title = 'Clients Management';
+  else if (location.pathname.includes('/notifications')) title = 'Notifications Center';
+  else if (location.pathname.includes('/admin')) title = 'Platform Admin Portal';
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-gray-50 text-gray-900 font-sans selection:bg-brand-500/30">
+    <div className="flex h-dvh w-full overflow-hidden bg-[var(--neu-bg)] text-[var(--neu-text-primary)] font-sans selection:bg-blue-500/20">
       {/* Desktop/Tablet sidebar — hidden on mobile */}
       {!isMobileNav && <Sidebar />}
 
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative bg-gray-50/50">
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative bg-[var(--neu-bg)]">
         <Header title={title} onMenuClick={() => setDrawerOpen(true)} />
         <FreePlanBanner />
         <main className={`flex-1 overflow-y-auto relative scroll-smooth bg-transparent ${isMobileNav ? 'pb-bottom-nav' : ''}`}>

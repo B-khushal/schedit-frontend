@@ -191,23 +191,23 @@ export function Settings() {
   ];
 
   return (
-    <div className="p-4 md:p-8 max-w-[1200px] mx-auto w-full flex flex-col md:flex-row gap-6 md:gap-8 animate-fade-in bg-transparent">
+    <div className="p-4 sm:p-6 md:p-8 max-w-[1200px] mx-auto w-full flex flex-col md:flex-row gap-6 md:gap-8 animate-fade-in text-[var(--neu-text-primary)]">
       {/* Settings Navigation */}
-      <div className="w-full md:w-60 shrink-0 space-y-1">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900 font-display tracking-tight mb-4 md:mb-6 px-1 md:px-3">Settings</h1>
-        <div className="flex md:block gap-2 overflow-x-auto scrollbar-hide pb-1 md:pb-0">
+      <div className="w-full md:w-60 shrink-0 space-y-2">
+        <h1 className="text-xl md:text-2xl font-extrabold text-[var(--neu-text-primary)] font-display tracking-tight mb-4 px-1 md:px-2">Settings</h1>
+        <div className="flex md:flex-col gap-1.5 overflow-x-auto scrollbar-hide pb-1 md:pb-0">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "min-w-max md:w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 text-left cursor-pointer",
+              "min-w-max md:w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-150 text-left cursor-pointer select-none",
               activeTab === tab.id 
-                ? "bg-white text-gray-900 shadow-card font-bold border border-gray-200" 
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                ? "neu-button-inset text-blue-500" 
+                : "text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)] hover:neu-raised-sm"
             )}
           >
-            <tab.icon className={cn("w-4 h-4", activeTab === tab.id ? "text-brand-600" : "text-gray-400")} />
+            <tab.icon className={cn("w-4 h-4", activeTab === tab.id ? "text-blue-500" : "text-[var(--neu-text-muted)]")} />
             {tab.label}
           </button>
         ))}
@@ -215,12 +215,12 @@ export function Settings() {
       </div>
 
       {/* Settings Details workspace container */}
-      <div className="flex-1 bg-white border border-gray-200 rounded-2xl p-4 md:p-8 shadow-card min-h-[500px] min-w-0">
+      <div className="flex-1 neu-card rounded-3xl p-6 md:p-8 min-h-[500px] min-w-0">
         {activeTab === 'general' && (
           <form onSubmit={handleUpdateOrg} className="space-y-6 max-w-2xl text-left">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 font-display">Workspace Configuration</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Manage logo placements, branding and scheduled publication default timezones.</p>
+              <h2 className="text-lg font-bold text-[var(--neu-text-primary)] font-display">Workspace Configuration</h2>
+              <p className="text-xs text-[var(--neu-text-secondary)] mt-0.5">Manage logo placements, branding and scheduled publication default timezones.</p>
             </div>
             
             <div className="space-y-4">
@@ -250,7 +250,7 @@ export function Settings() {
               />
             </div>
 
-            <div className="pt-4 border-t border-gray-100 flex justify-end">
+            <div className="pt-4 border-t border-[var(--neu-border-inset)]/50 flex justify-end">
               <Button type="submit" variant="primary" loading={loading} icon={<Save className="w-4 h-4" />}>
                 Save Changes
               </Button>
@@ -261,18 +261,18 @@ export function Settings() {
         {activeTab === 'security' && (
           <div className="space-y-6 max-w-2xl text-left">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 font-display">Security Settings</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Setup Multi-Factor authentication and identity access profiles.</p>
+              <h2 className="text-lg font-bold text-[var(--neu-text-primary)] font-display">Security Settings</h2>
+              <p className="text-xs text-[var(--neu-text-secondary)] mt-0.5">Setup Multi-Factor authentication and identity access profiles.</p>
             </div>
 
             <div className="space-y-4">
-              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="p-5 neu-well rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-sm font-bold text-gray-800">Two-Factor Authentication (2FA)</h4>
-                  <p className="text-xs text-gray-500 mt-0.5">Add an extra layer of security to prevent account takeovers.</p>
+                  <h4 className="text-sm font-bold text-[var(--neu-text-primary)]">Two-Factor Authentication (2FA)</h4>
+                  <p className="text-xs text-[var(--neu-text-secondary)] mt-0.5">Add an extra layer of security to prevent account takeovers.</p>
                 </div>
                 {twoFactorEnabled ? (
-                  <span className="px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                  <span className="px-3 py-1 neu-pill-inset text-xs font-bold text-emerald-500 flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5" /> Enabled
                   </span>
                 ) : (
@@ -282,12 +282,12 @@ export function Settings() {
                 )}
               </div>
 
-              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="p-5 neu-well rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-sm font-bold text-gray-800">Single Sign-On (SSO)</h4>
-                  <p className="text-xs text-gray-500 mt-0.5">Authenticate with standard corporate identity providers like Okta/SAML.</p>
+                  <h4 className="text-sm font-bold text-[var(--neu-text-primary)]">Single Sign-On (SSO)</h4>
+                  <p className="text-xs text-[var(--neu-text-secondary)] mt-0.5">Authenticate with standard corporate identity providers like Okta/SAML.</p>
                 </div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-white border border-gray-200 px-2.5 py-1 rounded-lg">Enterprise</span>
+                <span className="text-[10px] font-bold text-[var(--neu-text-muted)] uppercase tracking-wider neu-pill-inset px-2.5 py-1">Enterprise</span>
               </div>
             </div>
           </div>

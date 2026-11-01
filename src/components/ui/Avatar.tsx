@@ -40,7 +40,7 @@ export function Avatar({ src, name, size = 'md', online, className }: AvatarProp
     <div className={cn('relative shrink-0', className)}>
       <div
         className={cn(
-          'rounded-full overflow-hidden bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-2xs border border-white/20 select-none',
+          'rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white neu-avatar-frame select-none',
           sizes[size],
         )}
       >

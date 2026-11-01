@@ -500,7 +500,7 @@ export function CreatePost() {
   // RENDER
   // ═══════════════════════════════════════════════════════════════
   return (
-    <div className="min-h-[calc(100dvh-3.5rem)] lg:h-[calc(100vh-3.5rem)] flex flex-col lg:flex-row w-full overflow-x-hidden lg:overflow-hidden bg-gray-50/30 font-sans select-none">
+    <div className="min-h-[calc(100dvh-3.5rem)] lg:h-[calc(100vh-3.5rem)] flex flex-col lg:flex-row w-full overflow-x-hidden lg:overflow-hidden bg-[var(--neu-bg)] text-[var(--neu-text-primary)] font-sans select-none">
 
       {/* ╔═══════════════════════════════════════════════════════╗ */}
       {/* ║  LEFT SIDEBAR – Publishing Accounts                  ║ */}
@@ -513,7 +513,7 @@ export function CreatePost() {
             animate={{ width: 280, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="hidden lg:flex h-full bg-white border-r border-gray-200 flex-col shrink-0 overflow-hidden"
+            className="hidden lg:flex h-full bg-[var(--neu-surface)] border-r border-[var(--neu-border-inset)]/50 flex-col shrink-0 overflow-hidden"
           >
             {/* Sidebar Header */}
             <div className="p-4 border-b border-gray-100 space-y-3 shrink-0">
@@ -693,27 +693,27 @@ export function CreatePost() {
       <div className={cn("flex-1 flex flex-col overflow-y-auto min-w-0", mobileStudioView === 'preview' && "hidden lg:flex")}>
 
         {/* Sticky Sub-Header */}
-        <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-gray-200 px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shrink-0">
+        <div className="sticky top-0 z-20 bg-[var(--neu-bg)] border-b border-[var(--neu-border-inset)]/50 px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shrink-0">
           <div className="flex items-center justify-between gap-4 w-full sm:w-auto">
             <div>
-              <h1 className="text-lg font-bold text-gray-900 font-display tracking-tight leading-none">Create Studio</h1>
-              <div className="lg:hidden flex items-center gap-1 p-1 bg-gray-100 rounded-xl mt-3">
+              <h1 className="text-lg font-extrabold text-[var(--neu-text-primary)] font-display tracking-tight leading-none">Content Composer</h1>
+              <div className="lg:hidden flex items-center gap-1 p-1 neu-well rounded-xl mt-3">
                 <button
                   type="button"
                   onClick={() => setMobileStudioView('editor')}
-                  className={cn("px-3 py-1.5 rounded-lg text-xs font-bold transition-all", mobileStudioView === 'editor' ? "bg-white text-brand-700 shadow-xs" : "text-gray-500")}
+                  className={cn("px-3 py-1.5 rounded-lg text-xs font-bold transition-all", mobileStudioView === 'editor' ? "neu-button-primary text-white shadow-xs" : "text-[var(--neu-text-secondary)]")}
                 >
                   Editor
                 </button>
                 <button
                   type="button"
                   onClick={() => setMobileStudioView('preview')}
-                  className={cn("px-3 py-1.5 rounded-lg text-xs font-bold transition-all", mobileStudioView === 'preview' ? "bg-white text-brand-700 shadow-xs" : "text-gray-500")}
+                  className={cn("px-3 py-1.5 rounded-lg text-xs font-bold transition-all", mobileStudioView === 'preview' ? "neu-button-primary text-white shadow-xs" : "text-[var(--neu-text-secondary)]")}
                 >
                   Preview
                 </button>
               </div>
-              <p className="text-[11px] text-gray-400 mt-0.5 font-medium">{currentProject.name} · {selectedAccountIds.length} account{selectedAccountIds.length !== 1 ? 's' : ''} selected</p>
+              <p className="text-[11px] text-[var(--neu-text-muted)] mt-0.5 font-medium">{currentProject.name} · {selectedAccountIds.length} account{selectedAccountIds.length !== 1 ? 's' : ''} selected</p>
             </div>
           </div>
 

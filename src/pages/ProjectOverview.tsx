@@ -238,13 +238,13 @@ export function ProjectOverview() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Recent Posts Activity */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-card overflow-hidden">
-          <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+        <div className="lg:col-span-2 neu-card rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between p-6 pb-4 border-b border-black/5 dark:border-white/5">
             <div>
-              <h2 className="text-base font-bold text-gray-900 font-display">Recent Content Activity</h2>
-              <p className="text-xs text-gray-500 mt-0.5">{posts.length} total posts in this workspace</p>
+              <h2 className="text-base font-bold text-[var(--neu-text-primary)] font-display">Recent Content Activity</h2>
+              <p className="text-xs text-[var(--neu-text-secondary)] mt-0.5">{posts.length} total posts in this workspace</p>
             </div>
-            <Link to="/app/workflow" className="text-xs font-bold text-brand-600 hover:text-brand-500 flex items-center gap-1 transition-colors">
+            <Link to="/app/workflow" className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
               View All <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -322,56 +322,56 @@ export function ProjectOverview() {
         {/* Quick Navigation & Media Preview */}
         <div className="space-y-6">
           {/* Quick Actions */}
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-card p-6">
-            <h2 className="text-sm font-bold text-gray-900 font-display mb-4">Quick Actions</h2>
+          <div className="neu-card rounded-2xl p-6">
+            <h2 className="text-sm font-bold text-[var(--neu-text-primary)] font-display mb-4">Quick Actions</h2>
             <div className="space-y-2">
               {[
-                { icon: PenSquare, label: 'Create New Post', to: '/app/studio', color: 'text-brand-500 bg-brand-50 border-brand-100' },
-                { icon: Plug, label: 'Manage Connected Apps', to: `/app/projects/${id}/apps`, color: 'text-blue-500 bg-blue-50 border-blue-100' },
-                { icon: Inbox, label: 'Workflow Queue', to: '/app/workflow', color: 'text-purple-500 bg-purple-50 border-purple-100' },
-                { icon: BarChart3, label: 'Analytics Dashboard', to: '/app/analytics', color: 'text-emerald-500 bg-emerald-50 border-emerald-100' },
-                { icon: ImageIcon, label: 'Media Assets Library', to: '/app/assets', color: 'text-amber-500 bg-amber-50 border-amber-100' },
-                { icon: Settings, label: 'API Connections', to: `/app/projects/${id}/api`, color: 'text-gray-500 bg-gray-50 border-gray-100' },
+                { icon: PenSquare, label: 'Create New Post', to: '/app/studio', color: 'text-blue-500 bg-blue-50/10' },
+                { icon: Plug, label: 'Manage Connected Apps', to: `/app/projects/${id}/apps`, color: 'text-indigo-500 bg-indigo-50/10' },
+                { icon: Inbox, label: 'Workflow Queue', to: '/app/workflow', color: 'text-purple-500 bg-purple-50/10' },
+                { icon: BarChart3, label: 'Analytics Dashboard', to: '/app/analytics', color: 'text-emerald-500 bg-emerald-50/10' },
+                { icon: ImageIcon, label: 'Media Assets Library', to: '/app/assets', color: 'text-amber-500 bg-amber-50/10' },
+                { icon: Settings, label: 'API Connections', to: `/app/projects/${id}/api`, color: 'text-gray-500 bg-gray-50/10' },
               ].map((action, i) => (
                 <Link
                   key={i}
                   to={action.to}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-all group"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all group"
                 >
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center border shrink-0", action.color)}>
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 neu-raised", action.color)}>
                     <action.icon className="w-4 h-4" />
                   </div>
-                  <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900 transition-colors">{action.label}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 ml-auto group-hover:text-gray-500 transition-colors" />
+                  <span className="text-xs font-semibold text-[var(--neu-text-secondary)] group-hover:text-[var(--neu-text-primary)] transition-colors">{action.label}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-400 ml-auto group-hover:text-gray-500 transition-colors" />
                 </Link>
               ))}
             </div>
           </div>
 
           {/* Recent Assets Preview */}
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-card p-6">
+          <div className="neu-card rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-gray-900 font-display">Recent Assets</h2>
-              <Link to="/app/assets" className="text-[10px] font-bold text-brand-600 hover:text-brand-500 transition-colors">
+              <h2 className="text-sm font-bold text-[var(--neu-text-primary)] font-display">Recent Assets</h2>
+              <Link to="/app/assets" className="text-[10px] font-bold text-blue-600 hover:text-blue-700 transition-colors">
                 View All
               </Link>
             </div>
             {assets.length === 0 ? (
               <div className="text-center py-6">
                 <ImageIcon className="w-6 h-6 text-gray-300 mx-auto mb-1.5" />
-                <p className="text-[11px] text-gray-400">No assets uploaded yet</p>
+                <p className="text-[11px] text-[var(--neu-text-secondary)]">No assets uploaded yet</p>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-2">
                 {assets.slice(0, 6).map((asset: any) => (
                   <div
                     key={asset.id}
-                    className="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-150 hover:border-brand-300 transition-all cursor-pointer group"
+                    className="aspect-square rounded-xl overflow-hidden neu-inset hover:opacity-90 transition-all cursor-pointer group p-1"
                   >
                     <img
                       src={asset.secureUrl?.replace('/upload/', '/upload/w_150,h_150,c_fill/') || ''}
                       alt=""
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      className="w-full h-full object-cover rounded-lg transition-transform group-hover:scale-105"
                     />
                   </div>
                 ))}
@@ -382,7 +382,7 @@ export function ProjectOverview() {
       </div>
 
       {/* ── WORKSPACE ARCHITECTURE FLOW ──────────────────────────────── */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-card">
+      <div className="neu-card rounded-2xl p-6 md:p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-base font-bold text-gray-900 font-display">Workspace Architecture</h2>

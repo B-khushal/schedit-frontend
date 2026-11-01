@@ -139,16 +139,16 @@ export function Analytics() {
         />
 
         {/* Global Filter Bar */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="neu-card rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4 text-[var(--neu-text-primary)]">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700">
-              <Filter className="w-3.5 h-3.5 text-gray-500" />
+            <div className="flex items-center gap-2 px-3 py-1.5 neu-inset-sm rounded-xl text-xs font-bold text-[var(--neu-text-secondary)]">
+              <Filter className="w-3.5 h-3.5 text-blue-500" />
               <span>Filters:</span>
             </div>
 
             {/* Platform Filter */}
             <select
-              className="px-3 py-1.5 border border-gray-200 rounded-xl text-xs font-medium text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="px-3 py-1.5 neu-input rounded-xl text-xs font-bold text-[var(--neu-text-primary)] focus:outline-none cursor-pointer"
               value={selectedPlatform}
               onChange={(e) => setSelectedPlatform(e.target.value)}
             >
@@ -161,7 +161,7 @@ export function Analytics() {
 
             {/* Account Filter */}
             <select
-              className="px-3 py-1.5 border border-gray-200 rounded-xl text-xs font-medium text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="px-3 py-1.5 neu-input rounded-xl text-xs font-bold text-[var(--neu-text-primary)] focus:outline-none cursor-pointer"
               value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
             >
@@ -175,7 +175,7 @@ export function Analytics() {
 
             {/* Time Range Filter */}
             <select
-              className="px-3 py-1.5 border border-gray-200 rounded-xl text-xs font-medium text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="px-3 py-1.5 neu-input rounded-xl text-xs font-bold text-[var(--neu-text-primary)] focus:outline-none cursor-pointer"
               value={timeRange}
               onChange={(e: any) => setTimeRange(e.target.value)}
             >
@@ -186,16 +186,16 @@ export function Analytics() {
           </div>
 
           {/* Sub Navigation Tabs */}
-          <div className="flex items-center p-1 bg-gray-100 rounded-xl overflow-x-auto scrollbar-hide w-full sm:w-auto">
+          <div className="flex items-center p-1 neu-well rounded-2xl overflow-x-auto scrollbar-hide w-full sm:w-auto">
             {(['overview', 'feed', 'reels', 'stories', 'charts'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  'px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold capitalize transition-all whitespace-nowrap shrink-0',
+                  'px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition-all whitespace-nowrap shrink-0 cursor-pointer select-none',
                   activeTab === tab
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+                    ? 'neu-button-primary text-white shadow-xs'
+                    : 'text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)]'
                 )}
               >
                 {tab}

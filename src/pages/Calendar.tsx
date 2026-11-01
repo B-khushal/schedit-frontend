@@ -142,14 +142,14 @@ export function Calendar() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 font-display tracking-tight">Content Calendar</h2>
-          <div className="flex items-center bg-white border border-gray-200 rounded-xl shadow-xs p-1">
-            <button onClick={handlePrevDate} className="p-1.5 hover:bg-gray-50 rounded-lg text-gray-600 hover:text-gray-900 transition-colors">
+          <div className="flex items-center neu-button rounded-xl p-1">
+            <button onClick={handlePrevDate} className="p-1.5 hover:scale-105 rounded-lg text-[var(--neu-text-secondary)] transition-transform cursor-pointer">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="px-4 text-xs font-bold text-gray-800 uppercase tracking-wide">
+            <span className="px-4 text-xs font-bold text-[var(--neu-text-primary)] uppercase tracking-wide">
               {view === 'day' ? format(currentDate, 'MMMM dd, yyyy') : format(currentDate, 'MMMM yyyy')}
             </span>
-            <button onClick={handleNextDate} className="p-1.5 hover:bg-gray-50 rounded-lg text-gray-600 hover:text-gray-900 transition-colors">
+            <button onClick={handleNextDate} className="p-1.5 hover:scale-105 rounded-lg text-[var(--neu-text-secondary)] transition-transform cursor-pointer">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -184,14 +184,14 @@ export function Calendar() {
             ))}
           </Dropdown>
 
-          <div className="flex bg-white border border-gray-200 p-1 rounded-xl shadow-xs overflow-x-auto scrollbar-hide">
+          <div className="flex neu-well p-1 rounded-2xl overflow-x-auto scrollbar-hide">
             {(['month', 'week', 'day', 'agenda'] as CalendarView[]).map(v => (
               <button
                 key={v}
                 onClick={() => setView(v)}
                 className={cn(
-                  "px-3 sm:px-3.5 py-1.5 text-xs font-bold capitalize rounded-lg transition-all whitespace-nowrap shrink-0",
-                  view === v ? "bg-brand-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-800"
+                  "px-3 sm:px-3.5 py-1.5 text-xs font-bold capitalize rounded-xl transition-all whitespace-nowrap shrink-0 cursor-pointer select-none",
+                  view === v ? "neu-button-primary text-white shadow-xs" : "text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)]"
                 )}
               >
                 {v}
@@ -211,20 +211,20 @@ export function Calendar() {
       </div>
 
       {/* Calendar body layout */}
-      <div className="flex-1 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-card flex flex-col min-h-0 relative">
+      <div className="flex-1 neu-card rounded-3xl overflow-hidden flex flex-col min-h-0 relative text-[var(--neu-text-primary)]">
         {view === 'agenda' ? (
           // Agenda list view
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {filteredPosts.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-12 font-medium">No posts found in calendar view filters.</p>
+              <p className="text-sm text-[var(--neu-text-muted)] text-center py-12 font-medium">No posts found in calendar view filters.</p>
             ) : (
               filteredPosts.map(post => (
-                <div key={post.id} onClick={() => navigate('/app/workflow')} className="p-3 sm:p-4 bg-gray-50/50 rounded-xl border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-gray-50 transition-all cursor-pointer">
+                <div key={post.id} onClick={() => navigate('/app/workflow')} className="p-4 neu-well rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:scale-[1.01] transition-transform cursor-pointer">
                   <div className="flex gap-4 items-start">
-                    <Clock className="w-4 h-4 text-gray-400 mt-1" />
+                    <Clock className="w-4 h-4 text-blue-500 mt-1 shrink-0" />
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">{format(new Date(post.scheduledTime), 'MMM dd, h:mm a')}</p>
-                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">{post.content}</p>
+                      <p className="text-sm font-bold text-[var(--neu-text-primary)]">{format(new Date(post.scheduledTime), 'MMM dd, h:mm a')}</p>
+                      <p className="text-xs text-[var(--neu-text-secondary)] mt-1 line-clamp-2">{post.content}</p>
                     </div>
                   </div>
                   <div className="flex gap-3 items-center">
@@ -243,9 +243,9 @@ export function Calendar() {
           // Standard Calendar grid layouts
           <div className="flex-1 flex flex-col min-h-0">
             {/* Day Header row */}
-            <div className={cn("grid border-b border-gray-150 bg-gray-50/50 shrink-0", view === 'month' || view === 'week' ? "grid-cols-7" : "grid-cols-1")}>
+            <div className={cn("grid border-b border-[var(--neu-border-inset)]/50 neu-inset-sm shrink-0", view === 'month' || view === 'week' ? "grid-cols-7" : "grid-cols-1")}>
               {view === 'day' ? (
-                <div className="p-3 text-center text-xs font-bold text-gray-600 capitalize">
+                <div className="p-3 text-center text-xs font-bold text-[var(--neu-text-primary)] capitalize">
                   {format(currentDate, 'EEEE, MMMM dd')}
                 </div>
               ) : (

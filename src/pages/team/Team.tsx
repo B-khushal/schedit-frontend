@@ -125,7 +125,7 @@ export function Team() {
         <select
           value={row.role}
           onChange={(e) => handleRoleChange(row.userId, e.target.value)}
-          className="text-xs bg-white border border-gray-200 rounded-lg p-1.5 focus:outline-none focus:ring-1 focus:ring-brand-500 font-semibold text-gray-700 cursor-pointer shadow-xs"
+          className="text-xs neu-input rounded-xl p-2 font-bold text-[var(--neu-text-primary)] cursor-pointer"
         >
           <option value="OWNER">Owner</option>
           <option value="ADMIN">Admin</option>

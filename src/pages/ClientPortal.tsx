@@ -226,16 +226,16 @@ export function ClientPortal() {
   };
 
   return (
-    <div className="flex flex-col min-h-dvh lg:h-screen w-full bg-gray-50 text-gray-900 overflow-x-hidden lg:overflow-hidden font-sans">
+    <div className="flex flex-col min-h-dvh lg:h-screen w-full bg-[var(--neu-bg)] text-[var(--neu-text-primary)] overflow-x-hidden lg:overflow-hidden font-sans p-3 sm:p-4 gap-4">
       {/* Client Header */}
-      <header className="px-4 sm:px-6 py-4 bg-white border-b border-gray-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+      <header className="px-5 py-4 neu-card rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="px-3 py-1.5 bg-brand-600 text-white rounded-xl font-bold text-sm tracking-widest">SCHEDIT</div>
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider px-2.5 py-1 bg-gray-100 rounded-full border border-gray-200 truncate">
+          <div className="px-3.5 py-1.5 neu-button-primary text-white rounded-xl font-bold text-sm tracking-widest">SCHEDIT</div>
+          <span className="text-xs font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider px-3 py-1 neu-inset rounded-full truncate">
             External Portal Review Board
           </span>
         </div>
-        <div className="flex items-center gap-3 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-full w-fit">
+        <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 neu-inset px-3 py-1.5 rounded-full w-fit">
           <Lock className="w-3.5 h-3.5" /> Isolated Client Session
         </div>
       </header>
@@ -243,9 +243,9 @@ export function ClientPortal() {
       {/* Main Review Panels */}
       <div className="flex-1 flex flex-col xl:flex-row overflow-y-auto xl:overflow-hidden pb-bottom-nav sm:pb-0">
         {/* Left Side: Campaign list */}
-        <aside className="w-full xl:w-80 border-b xl:border-b-0 xl:border-r border-gray-200 bg-white p-4 sm:p-6 flex flex-col shrink-0 overflow-visible xl:overflow-y-auto space-y-4 xl:space-y-6">
+        <aside className="w-full xl:w-80 neu-card rounded-2xl p-4 sm:p-5 flex flex-col shrink-0 overflow-visible xl:overflow-y-auto space-y-4 xl:space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-xs text-gray-400 uppercase tracking-wider">Awaiting Approvals</h3>
+            <h3 className="font-bold text-xs text-[var(--neu-text-secondary)] uppercase tracking-wider">Awaiting Approvals</h3>
             <Badge variant="brand">{posts.length} Pending</Badge>
           </div>
 
@@ -259,15 +259,15 @@ export function ClientPortal() {
                   key={post.id}
                   onClick={() => handleSelectPost(post)}
                   className={cn(
-                    "min-w-[260px] xl:min-w-0 p-4 rounded-2xl border transition-all cursor-pointer text-left bg-white",
+                    "min-w-[260px] xl:min-w-0 p-4 rounded-2xl transition-all cursor-pointer text-left select-none",
                     isActive 
-                      ? "border-brand-500 ring-2 ring-brand-500/10 shadow-card bg-brand-50/[0.01]"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "neu-inset border-2 border-blue-500/60 bg-blue-500/5 shadow-xs"
+                      : "neu-raised hover:neu-raised-lg"
                   )}
                 >
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-2">Campaign queue item</p>
-                  <p className="text-sm font-semibold text-gray-900 line-clamp-2 leading-relaxed mb-3">{post.content}</p>
-                  <div className="flex justify-between items-center text-[10px] font-bold text-gray-400">
+                  <p className="text-[10px] font-bold text-[var(--neu-text-secondary)] uppercase mb-1">Campaign queue item</p>
+                  <p className="text-xs font-bold text-[var(--neu-text-primary)] line-clamp-2 leading-relaxed mb-3">{post.content}</p>
+                  <div className="flex justify-between items-center text-[10px] font-bold text-[var(--neu-text-secondary)]">
                     <span>{hasVideo ? '🎥 Video' : '🖼️ Image'} post</span>
                     <StatusPill status={post.status} size="sm" />
                   </div>

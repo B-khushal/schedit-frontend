@@ -361,14 +361,14 @@ export function Workflow() {
               )}
             </button>
             {/* View Switching Tab bar */}
-            <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl overflow-x-auto scrollbar-hide max-w-full">
+            <div className="flex items-center gap-1 p-1 neu-well rounded-xl overflow-x-auto scrollbar-hide max-w-full">
               {(['grid', 'kanban', 'list', 'timeline', 'calendar'] as const).map(mode => (
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
                   className={cn(
-                    "p-1.5 rounded-lg text-gray-500 hover:text-gray-900 transition-all cursor-pointer",
-                    viewMode === mode ? "bg-white text-brand-600 shadow-xs" : ""
+                    "p-2 rounded-lg transition-all cursor-pointer",
+                    viewMode === mode ? "neu-button-primary text-white" : "text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)]"
                   )}
                 >
                   {mode === 'grid' && <LayoutGrid className="w-4 h-4" />}
@@ -441,13 +441,13 @@ export function Workflow() {
 
                   return (
                     <motion.div
-                      whileHover={{ y: -4, scale: 1.01 }}
+                      whileHover={{ y: -3 }}
                       onClick={() => navigate(`/app/workflow/post/${post.id}`)}
                       key={post.id}
                       className={cn(
-                        "bg-white border rounded-2xl overflow-hidden hover:shadow-lg transition-all flex flex-col relative cursor-pointer",
-                        isFocused ? "ring-2 ring-brand-500" : "border-gray-200",
-                        isSelected ? "border-brand-500" : ""
+                        "neu-card rounded-2xl overflow-hidden hover:neu-card-hover transition-all flex flex-col relative cursor-pointer",
+                        isFocused ? "ring-2 ring-blue-500" : "",
+                        isSelected ? "ring-2 ring-blue-600" : ""
                       )}
                     >
                       {/* Checkbox trigger */}

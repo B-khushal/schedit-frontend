@@ -173,11 +173,11 @@ export function DataTable<T>({
         </div>
       ) : (
         /* Desktop/Tablet table view */
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-card">
+        <div className="neu-card rounded-2xl overflow-hidden text-[var(--neu-text-primary)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50/75 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <tr className="neu-inset-sm border-b border-[var(--neu-border-inset)] text-xs font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider">
                   {visibleColumns.map((col, idx) => {
                     const isSortable = col.sortable && typeof col.accessorKey === 'string';
                     return (
@@ -185,15 +185,15 @@ export function DataTable<T>({
                         key={idx}
                         onClick={() => isSortable && handleSort(col.accessorKey as keyof T)}
                         className={cn(
-                          'px-4 sm:px-6 py-3 sm:py-4 font-medium select-none',
-                          isSortable && 'cursor-pointer hover:bg-gray-100 hover:text-gray-900 transition-colors',
+                          'px-4 sm:px-6 py-3.5 sm:py-4 font-bold select-none',
+                          isSortable && 'cursor-pointer hover:text-[var(--neu-text-primary)] transition-colors',
                           col.className
                         )}
                       >
                         <div className="flex items-center gap-1.5">
                           {col.header}
                           {isSortable && sortKey === col.accessorKey && (
-                            sortOrder === 'asc' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />
+                            sortOrder === 'asc' ? <ChevronUp className="w-3.5 h-3.5 text-blue-500" /> : <ChevronDown className="w-3.5 h-3.5 text-blue-500" />
                           )}
                         </div>
                       </th>
@@ -201,14 +201,14 @@ export function DataTable<T>({
                   })}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200/50">
+              <tbody className="divide-y divide-[var(--neu-border-inset)]">
                 {paginatedData.map((row, rowIdx) => (
                   <tr
                     key={rowIdx}
                     onClick={() => onRowClick?.(row)}
                     className={cn(
                       'transition-colors duration-150',
-                      onRowClick ? 'hover:bg-gray-50 cursor-pointer' : 'hover:bg-gray-50/50'
+                      onRowClick ? 'hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer' : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'
                     )}
                   >
                     {visibleColumns.map((col, colIdx) => {
@@ -219,7 +219,7 @@ export function DataTable<T>({
                         cellContent = row[col.accessorKey] as unknown as React.ReactNode;
                       }
                       return (
-                        <td key={colIdx} className={cn('px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-700', col.className)}>
+                        <td key={colIdx} className={cn('px-4 sm:px-6 py-3.5 sm:py-4 text-sm text-[var(--neu-text-primary)]', col.className)}>
                           {cellContent}
                         </td>
                       );
@@ -242,15 +242,15 @@ export function DataTable<T>({
 
       {/* Pagination */}
       {sortedData.length > pageSize && (
-        <div className="flex items-center justify-between bg-white border border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl shadow-card gap-2">
-          <div className="text-xs sm:text-sm text-gray-500 hidden sm:block">
-            Showing <span className="font-semibold text-gray-900">{(currentPage - 1) * pageSize + 1}</span> to{' '}
-            <span className="font-semibold text-gray-900">
+        <div className="flex items-center justify-between neu-card px-4 py-3 rounded-2xl gap-2 text-[var(--neu-text-primary)]">
+          <div className="text-xs sm:text-sm text-[var(--neu-text-secondary)] hidden sm:block">
+            Showing <span className="font-bold text-[var(--neu-text-primary)]">{(currentPage - 1) * pageSize + 1}</span> to{' '}
+            <span className="font-bold text-[var(--neu-text-primary)]">
               {Math.min(currentPage * pageSize, sortedData.length)}
             </span>{' '}
-            of <span className="font-semibold text-gray-900">{sortedData.length}</span>
+            of <span className="font-bold text-[var(--neu-text-primary)]">{sortedData.length}</span>
           </div>
-          <div className="text-xs text-gray-500 sm:hidden">
+          <div className="text-xs text-[var(--neu-text-secondary)] sm:hidden">
             {currentPage} / {totalPages}
           </div>
           <div className="flex items-center gap-1">

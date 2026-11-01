@@ -35,28 +35,28 @@ export function Register() {
   };
 
   return (
-    <div className="min-h-dvh flex w-full font-sans bg-gray-50 selection:bg-brand-500/30">
+    <div className="min-h-dvh flex w-full font-sans bg-[var(--neu-bg)] text-[var(--neu-text-primary)] selection:bg-blue-500/20">
       {/* Left panel - Form */}
-      <div className="flex-1 flex flex-col justify-center px-4 sm:px-12 lg:px-24 py-10 sm:py-12">
-        <div className="w-full max-w-sm mx-auto">
-          <Link to="/" className="flex items-center gap-2 mb-10 group w-fit">
-            <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <Sparkles className="w-4 h-4 text-brand-600" />
+      <div className="flex-1 flex flex-col justify-center px-4 sm:px-12 lg:px-20 py-10 sm:py-12">
+        <div className="w-full max-w-md mx-auto neu-card p-8 sm:p-10 rounded-3xl shadow-xl">
+          <Link to="/" className="flex items-center gap-2.5 mb-8 group w-fit">
+            <div className="w-9 h-9 rounded-2xl neu-button flex items-center justify-center text-blue-500 group-hover:scale-105 transition-transform">
+              <Sparkles className="w-4 h-4" />
             </div>
-            <span className="font-bold text-gray-900 text-lg font-display tracking-tight">SCHEDIT</span>
+            <span className="font-extrabold text-[var(--neu-text-primary)] text-lg font-display tracking-tight">SCHEDIT</span>
           </Link>
 
-          <h1 className="text-3xl font-bold text-gray-900 font-display tracking-tight mb-2">Create an account</h1>
-          <p className="text-gray-500 mb-8 text-sm font-medium">Start your 14-day free trial. No credit card required.</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--neu-text-primary)] font-display tracking-tight mb-1.5">Create an account</h1>
+          <p className="text-[var(--neu-text-secondary)] mb-6 text-xs sm:text-sm font-medium">Start your 14-day free trial. No credit card required.</p>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 text-red-800 text-sm animate-fade-in font-medium">
-              <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+            <div className="mb-6 p-4 neu-inset-sm rounded-2xl flex items-start gap-3 text-rose-500 text-xs sm:text-sm animate-fade-in font-bold">
+              <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleRegister} className="space-y-5">
+          <form onSubmit={handleRegister} className="space-y-4">
             <Input
               id="name"
               label="Full name"
@@ -93,53 +93,37 @@ export function Register() {
               disabled={loading}
               hint="Must be at least 8 characters long."
             />
-            
+
             <Button
               type="submit"
               variant="primary"
               loading={loading}
-              className="w-full py-3 text-sm font-bold shadow-brand rounded-xl"
+              className="w-full py-3 text-sm font-extrabold rounded-2xl mt-2"
               iconRight={<ArrowRight className="w-4 h-4" />}
             >
-              Start Free Trial
+              Get Started Free
             </Button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-gray-500 font-medium">
-            Already have an account? <Link to="/login" className="font-semibold text-brand-500 hover:text-brand-600 transition-colors">Sign in</Link>
+          <div className="mt-8 text-center text-xs sm:text-sm text-[var(--neu-text-muted)] font-medium">
+            Already have an account? <Link to="/login" className="font-bold text-blue-500 hover:text-blue-600 transition-colors">Sign in</Link>
           </div>
         </div>
       </div>
 
-      {/* Right panel - Visual */}
-      <div className="hidden lg:flex flex-1 bg-gray-50/50 relative overflow-hidden items-center justify-center p-12 border-l border-gray-200">
-        <div className="w-full max-w-lg">
-          <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-xl mb-8">
-            <div className="flex gap-1 text-brand-400 mb-4">
-              {[1,2,3,4,5].map(i => (
-                <svg key={i} className="w-5 h-5 fill-current text-brand-500" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                </svg>
-              ))}
-            </div>
-            <p className="text-lg text-gray-900 font-medium mb-6 leading-relaxed">
-              "SCHEDIT completely transformed how our agency handles content. We've saved countless hours and the team collaboration features are unmatched."
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">SJ</div>
-              <div>
-                <p className="text-sm font-bold text-gray-900">Sarah Jenkins</p>
-                <p className="text-xs text-gray-500">Marketing Director, TechFlow</p>
-              </div>
-            </div>
+      {/* Right side - Visual panel */}
+      <div className="hidden lg:flex flex-1 relative overflow-hidden items-center justify-center p-12 border-l border-[var(--neu-border-inset)]/50">
+        <div className="relative z-10 w-full max-w-lg neu-card rounded-3xl p-10 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full neu-pill-inset text-blue-500 text-xs font-extrabold mb-6">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Autonomous AI Marketing OS</span>
           </div>
-          
-          <div className="flex flex-wrap gap-4 text-xs font-bold text-gray-400 justify-center uppercase tracking-wider">
-            <span>Trusted By</span>
-            <span className="text-gray-600">Acme Corp</span>
-            <span className="text-gray-600">Globex</span>
-            <span className="text-gray-600">Soyuz</span>
-          </div>
+          <h2 className="text-3xl font-extrabold text-[var(--neu-text-primary)] font-display mb-4 tracking-tight leading-tight">
+            Soft UI. Intelligent Operations.
+          </h2>
+          <p className="text-[var(--neu-text-secondary)] text-sm leading-relaxed font-medium">
+            Join thousands of teams scaling their social reach, content pipelines, and autonomous marketing with SchedIt.
+          </p>
         </div>
       </div>
     </div>

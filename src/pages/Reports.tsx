@@ -105,7 +105,7 @@ export function Reports() {
           actions={
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
               <select
-                className="px-3 py-2 sm:py-1.5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-800 bg-white w-full sm:w-auto"
+                className="neu-input px-3 py-2 text-xs font-bold w-full sm:w-auto"
                 value={dateRange}
                 onChange={(e: any) => setDateRange(e.target.value)}
               >
@@ -140,8 +140,8 @@ export function Reports() {
         {/* Top Performers Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
           {/* Best Performing Post */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm">
+          <div className="neu-card rounded-2xl p-6 space-y-4">
+            <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
               <Award className="w-5 h-5" />
               <span>Best Performing Feed Post</span>
             </div>
@@ -149,23 +149,23 @@ export function Reports() {
               <div className="space-y-3 pt-2">
                 <div className="flex items-center gap-2">
                   <PlatformIcon platform={reportData.bestPerformingPost.platform} size="xs" />
-                  <span className="text-xs font-bold text-gray-700">{reportData.bestPerformingPost.platform}</span>
+                  <span className="text-xs font-bold text-[var(--neu-text-primary)]">{reportData.bestPerformingPost.platform}</span>
                 </div>
-                <p className="text-xs text-gray-800 line-clamp-3 leading-relaxed font-medium">
+                <p className="text-xs text-[var(--neu-text-secondary)] line-clamp-3 leading-relaxed font-medium">
                   {reportData.bestPerformingPost.caption || 'No caption'}
                 </p>
-                <div className="flex items-center justify-between text-xs font-bold pt-2 border-t border-gray-100">
-                  <span className="text-indigo-600">{(reportData.bestPerformingPost.metrics?.reach || 0).toLocaleString()} Reach</span>
+                <div className="flex items-center justify-between text-xs font-bold pt-2 border-t border-black/5 dark:border-white/5">
+                  <span className="text-blue-600">{(reportData.bestPerformingPost.metrics?.reach || 0).toLocaleString()} Reach</span>
                   <span className="text-emerald-600">{reportData.bestPerformingPost.metrics?.engagementRate || 0}% Rate</span>
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-gray-400 py-6">Analytics unavailable for this content.</p>
+              <p className="text-xs text-[var(--neu-text-secondary)] py-6">Analytics unavailable for this content.</p>
             )}
           </div>
 
           {/* Top Reel */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
+          <div className="neu-card rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-2 text-purple-600 font-bold text-sm">
               <Award className="w-5 h-5" />
               <span>Top Performing Reel / Video</span>
@@ -174,23 +174,23 @@ export function Reports() {
               <div className="space-y-3 pt-2">
                 <div className="flex items-center gap-2">
                   <PlatformIcon platform={reportData.topReel.platform} size="xs" />
-                  <span className="text-xs font-bold text-gray-700">{reportData.topReel.platform}</span>
+                  <span className="text-xs font-bold text-[var(--neu-text-primary)]">{reportData.topReel.platform}</span>
                 </div>
-                <p className="text-xs text-gray-800 line-clamp-3 leading-relaxed font-medium">
+                <p className="text-xs text-[var(--neu-text-secondary)] line-clamp-3 leading-relaxed font-medium">
                   {reportData.topReel.caption || 'Video Reel'}
                 </p>
-                <div className="flex items-center justify-between text-xs font-bold pt-2 border-t border-gray-100">
+                <div className="flex items-center justify-between text-xs font-bold pt-2 border-t border-black/5 dark:border-white/5">
                   <span className="text-purple-600">{(reportData.topReel.metrics?.videoViews || reportData.topReel.metrics?.reach || 0).toLocaleString()} Views</span>
-                  <span className="text-gray-700">{reportData.topReel.metrics?.likes || 0} Likes</span>
+                  <span className="text-[var(--neu-text-secondary)]">{reportData.topReel.metrics?.likes || 0} Likes</span>
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-gray-400 py-6">Analytics unavailable for this content.</p>
+              <p className="text-xs text-[var(--neu-text-secondary)] py-6">Analytics unavailable for this content.</p>
             )}
           </div>
 
           {/* Top Story */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
+          <div className="neu-card rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-2 text-amber-600 font-bold text-sm">
               <Award className="w-5 h-5" />
               <span>Top Story Impression</span>

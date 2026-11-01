@@ -22,13 +22,13 @@ interface TimelineProps {
 
 export function Timeline({ events, className }: TimelineProps) {
   return (
-    <div className={cn('relative pl-6 border-l border-gray-200 ml-4 space-y-6', className)}>
+    <div className={cn('relative pl-6 border-l border-[var(--neu-border-inset)] ml-4 space-y-6', className)}>
       {events.map((event) => (
         <div key={event.id} className="relative">
           {/* Timeline Dot/Icon */}
           <div className="absolute -left-[35px] top-1 flex items-center justify-center">
             {event.icon ? (
-              <div className={cn('w-7 h-7 rounded-full flex items-center justify-center text-white shadow-sm ring-4 ring-white', event.iconBg || 'bg-brand-500')}>
+              <div className={cn('w-7 h-7 rounded-full flex items-center justify-center text-white neu-raised-sm', event.iconBg || 'bg-blue-500')}>
                 {event.icon}
               </div>
             ) : event.user ? (
@@ -36,26 +36,26 @@ export function Timeline({ events, className }: TimelineProps) {
                 src={event.user.avatarUrl}
                 name={event.user.name}
                 size="sm"
-                className="ring-4 ring-white"
+                className="neu-avatar-frame"
               />
             ) : (
-              <div className="w-3.5 h-3.5 rounded-full bg-brand-500 ring-4 ring-white shadow-sm" />
+              <div className="w-3.5 h-3.5 rounded-full bg-blue-500 neu-raised-sm" />
             )}
           </div>
 
           {/* Event Content */}
-          <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs max-w-2xl">
+          <div className="neu-card p-4 rounded-2xl max-w-2xl text-[var(--neu-text-primary)]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-              <span className="text-sm font-semibold text-gray-900">{event.title}</span>
-              <span className="text-xs text-gray-400 font-medium">{event.timestamp}</span>
+              <span className="text-sm font-bold text-[var(--neu-text-primary)]">{event.title}</span>
+              <span className="text-xs text-[var(--neu-text-muted)] font-semibold">{event.timestamp}</span>
             </div>
             {event.description && (
-              <p className="text-xs text-gray-500 mt-1.5 leading-relaxed font-medium">
+              <p className="text-xs text-[var(--neu-text-secondary)] mt-1.5 leading-relaxed font-medium">
                 {event.description}
               </p>
             )}
             {event.user && !event.icon && (
-              <div className="mt-2 text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+              <div className="mt-2 text-[10px] text-[var(--neu-text-muted)] font-bold uppercase tracking-wider">
                 By: {event.user.name}
               </div>
             )}

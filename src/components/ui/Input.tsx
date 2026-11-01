@@ -7,22 +7,23 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   hint?: string;
   icon?: React.ReactNode;
   iconRight?: React.ReactNode;
+  pill?: boolean;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, icon, iconRight, id, ...props }, ref) => {
+  ({ className, label, error, hint, icon, iconRight, pill, id, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
 
     return (
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 w-full">
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={inputId} className="block text-xs sm:text-sm font-semibold text-[var(--neu-text-secondary)] tracking-wide">
             {label}
           </label>
         )}
-        <div className="relative">
+        <div className="relative flex items-center">
           {icon && (
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="absolute left-3.5 text-[var(--neu-text-muted)] pointer-events-none flex items-center justify-center">
               {icon}
             </span>
           )}
@@ -30,26 +31,24 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              'w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900',
-              'placeholder:text-gray-400',
-              'focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500',
-              'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50',
-              'transition-colors duration-150',
+              'w-full neu-input px-4 py-2.5 text-sm text-[var(--neu-text-primary)] placeholder:text-[var(--neu-text-muted)]',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              pill ? 'rounded-full px-5' : 'rounded-2xl',
               icon && 'pl-10',
               iconRight && 'pr-10',
-              error && 'border-red-300 focus:ring-red-500/20 focus:border-red-500',
+              error && 'border-rose-400 focus:ring-rose-500/20',
               className,
             )}
             {...props}
           />
           {iconRight && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="absolute right-3.5 text-[var(--neu-text-muted)] flex items-center justify-center">
               {iconRight}
             </span>
           )}
         </div>
-        {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
-        {hint && !error && <p className="text-xs text-gray-500">{hint}</p>}
+        {error && <p className="text-xs text-rose-500 font-semibold">{error}</p>}
+        {hint && !error && <p className="text-xs text-[var(--neu-text-muted)]">{hint}</p>}
       </div>
     );
   }
@@ -68,9 +67,9 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
 
     return (
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 w-full">
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={inputId} className="block text-xs sm:text-sm font-semibold text-[var(--neu-text-secondary)] tracking-wide">
             {label}
           </label>
         )}
@@ -78,18 +77,15 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900',
-            'placeholder:text-gray-400 resize-none',
-            'focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500',
-            'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50',
-            'transition-colors duration-150',
-            error && 'border-red-300 focus:ring-red-500/20 focus:border-red-500',
+            'w-full neu-input px-4 py-3 text-sm text-[var(--neu-text-primary)] placeholder:text-[var(--neu-text-muted)] resize-none rounded-2xl',
+            'disabled:opacity-50 disabled:cursor-not-allowed',
+            error && 'border-rose-400 focus:ring-rose-500/20',
             className,
           )}
           {...props}
         />
-        {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
-        {hint && !error && <p className="text-xs text-gray-500">{hint}</p>}
+        {error && <p className="text-xs text-rose-500 font-semibold">{error}</p>}
+        {hint && !error && <p className="text-xs text-[var(--neu-text-muted)]">{hint}</p>}
       </div>
     );
   }
@@ -108,9 +104,9 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
 
     return (
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 w-full">
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={inputId} className="block text-xs sm:text-sm font-semibold text-[var(--neu-text-secondary)] tracking-wide">
             {label}
           </label>
         )}
@@ -118,22 +114,20 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900',
-            'focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500',
-            'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50',
-            'transition-colors duration-150 cursor-pointer',
-            error && 'border-red-300 focus:ring-red-500/20 focus:border-red-500',
+            'w-full neu-input px-4 py-2.5 text-sm text-[var(--neu-text-primary)] rounded-2xl cursor-pointer',
+            'disabled:opacity-50 disabled:cursor-not-allowed',
+            error && 'border-rose-400 focus:ring-rose-500/20',
             className,
           )}
           {...props}
         >
           {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
+            <option key={opt.value} value={opt.value} className="bg-[var(--neu-surface)] text-[var(--neu-text-primary)]">
               {opt.label}
             </option>
           ))}
         </select>
-        {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
+        {error && <p className="text-xs text-rose-500 font-semibold">{error}</p>}
       </div>
     );
   }

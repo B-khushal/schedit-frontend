@@ -79,32 +79,30 @@ export function Billing() {
         description="Verify billing plans, stripe tokens, invoice copies, and workspace usage trackers."
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-[var(--neu-text-primary)]">
         {/* Subscription Plan details */}
-        <div className="md:col-span-2 bg-white dark:bg-gray-900 border border-brand-200 dark:border-gray-800 rounded-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden shadow-card">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-          
+        <div className="md:col-span-2 neu-card rounded-3xl p-6 md:p-8 relative overflow-hidden">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative z-10 text-left">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white capitalize">{currentPlan.toLowerCase()} Tier</h2>
-                <span className="px-2.5 py-1 bg-brand-50 dark:bg-brand-950 border border-brand-100 text-brand-700 dark:text-brand-300 text-xs font-bold uppercase tracking-wider rounded-full">
+                <h2 className="text-xl font-extrabold text-[var(--neu-text-primary)] capitalize font-display">{currentPlan.toLowerCase()} Tier</h2>
+                <span className="px-3 py-1 neu-pill-inset text-blue-500 text-xs font-bold uppercase tracking-wider rounded-full">
                   Active
                 </span>
               </div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-semibold">Instant permission updates. Zero logout required.</p>
+              <p className="text-[var(--neu-text-secondary)] text-xs sm:text-sm font-semibold">Instant permission updates. Zero logout required.</p>
             </div>
             
             <div className="text-left sm:text-right">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">
+              <div className="text-3xl font-extrabold text-[var(--neu-text-primary)] font-display">
                 {currentPlan === 'ENTERPRISE' ? '₹24,999' : currentPlan === 'BUSINESS' ? '₹6,499' : currentPlan === 'PROFESSIONAL' ? '₹2,499' : '₹0'}
-                <span className="text-lg text-gray-500 font-medium">/mo</span>
+                <span className="text-sm text-[var(--neu-text-muted)] font-bold">/mo</span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Monthly Billing Cycle</p>
+              <p className="text-xs text-[var(--neu-text-muted)] mt-1 font-medium">Monthly Billing Cycle</p>
             </div>
           </div>
           
-          <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:flex-wrap gap-3 relative z-10">
+          <div className="mt-8 pt-8 border-t border-[var(--neu-border-inset)]/50 flex flex-col sm:flex-row sm:flex-wrap gap-3 relative z-10">
             {currentPlan !== 'PROFESSIONAL' && (
               <Button variant="primary" loading={upgrading} onClick={() => handleUpgrade('PROFESSIONAL')}>
                 Upgrade to Professional (₹2,499)
@@ -124,14 +122,14 @@ export function Billing() {
         </div>
 
         {/* Payment Card overview */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col justify-between shadow-card text-left">
+        <div className="neu-card rounded-3xl p-6 flex flex-col justify-between text-left">
           <div>
-            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Payment Method</h3>
-            <div className="flex items-center gap-3 bg-gray-50 p-3.5 rounded-xl border border-gray-200">
-              <CreditCard className="w-6 h-6 text-gray-400 shrink-0" />
+            <h3 className="text-xs font-bold text-[var(--neu-text-muted)] uppercase tracking-wider mb-4">Payment Method</h3>
+            <div className="flex items-center gap-3 neu-well p-4 rounded-2xl">
+              <CreditCard className="w-6 h-6 text-blue-500 shrink-0" />
               <div>
-                <p className="text-sm font-bold text-gray-800">•••• •••• •••• 4242</p>
-                <p className="text-[11px] text-gray-500 font-semibold">Expires 12/28</p>
+                <p className="text-sm font-bold text-[var(--neu-text-primary)]">•••• •••• •••• 4242</p>
+                <p className="text-[11px] text-[var(--neu-text-muted)] font-bold">Expires 12/28</p>
               </div>
             </div>
           </div>

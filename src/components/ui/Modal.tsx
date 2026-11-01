@@ -41,7 +41,7 @@ export function Modal({ open, onClose, children, className, size = 'md', title, 
     full: 'max-w-[calc(100vw-3rem)] max-h-[calc(100vh-3rem)]',
   };
 
-  // Mobile: full-screen drawer from bottom
+  // Mobile: bottom sheet
   if (isMobile) {
     return (
       <AnimatePresence>
@@ -53,10 +53,10 @@ export function Modal({ open, onClose, children, className, size = 'md', title, 
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
               onClick={onClose}
             />
-            
+
             {/* Modal Content — slides up from bottom */}
             <motion.div
               initial={{ y: '100%' }}
@@ -64,7 +64,7 @@ export function Modal({ open, onClose, children, className, size = 'md', title, 
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className={cn(
-                'relative bg-white rounded-t-2xl shadow-modal w-full max-h-[90vh] flex flex-col overflow-hidden',
+                'relative neu-card rounded-t-3xl rounded-b-none w-full max-h-[90vh] flex flex-col overflow-hidden text-[var(--neu-text-primary)]',
                 className,
               )}
               role="dialog"
@@ -73,27 +73,27 @@ export function Modal({ open, onClose, children, className, size = 'md', title, 
             >
               {/* Drag handle */}
               <div className="flex justify-center pt-3 pb-1 shrink-0">
-                <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                <div className="w-12 h-1.5 neu-inset-sm rounded-full" />
               </div>
 
               {(title || showClose) && (
-                <div className="flex items-start justify-between px-4 pb-2 shrink-0">
+                <div className="flex items-start justify-between px-5 py-3 shrink-0">
                   <div className="min-w-0">
-                    {title && <h2 className="text-lg font-bold text-gray-900 font-display">{title}</h2>}
-                    {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
+                    {title && <h2 className="text-base sm:text-lg font-bold text-[var(--neu-text-primary)] font-display">{title}</h2>}
+                    {description && <p className="text-xs text-[var(--neu-text-secondary)] mt-0.5">{description}</p>}
                   </div>
                   {showClose && (
                     <button
                       onClick={onClose}
-                      className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors -mt-1 touch-target"
+                      className="p-2 neu-button rounded-xl text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)] transition-all -mt-1 touch-target"
                       aria-label="Close"
                     >
-                      <X className="w-5 h-5" />
+                      <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
               )}
-              <div className="px-4 pb-4 flex-1 overflow-y-auto">{children}</div>
+              <div className="px-5 pb-5 flex-1 overflow-y-auto">{children}</div>
             </motion.div>
           </div>
         )}
@@ -101,7 +101,7 @@ export function Modal({ open, onClose, children, className, size = 'md', title, 
     );
   }
 
-  // Desktop/Tablet: centered modal
+  // Desktop/Tablet: centered soft elevated modal
   return (
     <AnimatePresence>
       {open && (
@@ -112,10 +112,10 @@ export function Modal({ open, onClose, children, className, size = 'md', title, 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={onClose}
           />
-          
+
           {/* Modal Content */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -123,7 +123,7 @@ export function Modal({ open, onClose, children, className, size = 'md', title, 
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-              'relative bg-white rounded-2xl shadow-modal border border-gray-200 w-full overflow-hidden max-h-[90vh] flex flex-col',
+              'relative neu-card rounded-3xl w-full overflow-hidden max-h-[90vh] flex flex-col text-[var(--neu-text-primary)]',
               sizes[size],
               className,
             )}
@@ -132,18 +132,18 @@ export function Modal({ open, onClose, children, className, size = 'md', title, 
             aria-label={title}
           >
             {(title || showClose) && (
-              <div className="flex items-start justify-between p-6 pb-0 shrink-0">
+              <div className="flex items-start justify-between p-6 pb-2 shrink-0">
                 <div>
-                  {title && <h2 className="text-lg font-bold text-gray-900 font-display">{title}</h2>}
-                  {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
+                  {title && <h2 className="text-lg font-bold text-[var(--neu-text-primary)] font-display">{title}</h2>}
+                  {description && <p className="text-xs sm:text-sm text-[var(--neu-text-secondary)] mt-1">{description}</p>}
                 </div>
                 {showClose && (
                   <button
                     onClick={onClose}
-                    className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors -mt-1 -mr-1"
+                    className="p-2 neu-button rounded-xl text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)] transition-all -mt-1 -mr-1"
                     aria-label="Close"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>

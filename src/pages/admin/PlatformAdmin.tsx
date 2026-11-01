@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { apiRequest } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { cn } from '../../lib/utils';
 import {
   Users,
   Shield,
@@ -35,11 +36,38 @@ import {
   UserPlus,
   Briefcase,
   Building,
+  Bot,
+  Cpu,
+  Power,
+  Play,
+  Square,
+  DollarSign,
+  Gauge,
+  Lock,
+  Unlock,
+  Globe,
+  Radio,
 } from 'lucide-react';
 
 export function PlatformAdmin() {
   const { user: currentUser, startImpersonation } = useAuth();
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'clients' | 'flags' | 'health' | 'audit'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'ai' | 'users' | 'clients' | 'flags' | 'health' | 'audit'>('overview');
+
+  // AI Control Center state
+  const [aiConfig, setAiConfig] = useState<any>(null);
+  const [isLoadingAiConfig, setIsLoadingAiConfig] = useState(false);
+  const [aiUsage, setAiUsage] = useState<any>(null);
+  const [isLoadingAiUsage, setIsLoadingAiUsage] = useState(false);
+  const [aiKeyInputs, setAiKeyInputs] = useState({
+    anthropic: '',
+    openai: '',
+    gemini: '',
+  });
+  const [editingKey, setEditingKey] = useState<Record<string, boolean>>({});
+  const [testStatus, setTestStatus] = useState<Record<string, { testing?: boolean; success?: boolean; latencyMs?: number; error?: string; message?: string }>>({});
+  const [isSavingAi, setIsSavingAi] = useState(false);
+  const [showEmergencyStopModal, setShowEmergencyStopModal] = useState(false);
+  const [emergencyStopReasonInput, setEmergencyStopReasonInput] = useState('');
 
   // Overview stats
   const [overview, setOverview] = useState<any>(null);
@@ -170,20 +198,121 @@ export function PlatformAdmin() {
     }
   }, []);
 
+  const fetchAiConfig = useCallback(async () => {
+    setIsLoadingAiConfig(true);
+    try {
+      const data = await apiRequest<any>('/api/v1/admin/ai/config');
+      setAiConfig(data);
+      setAiKeyInputs({
+        anthropic: data.anthropicApiKeyMasked || '',
+        openai: data.openaiApiKeyMasked || '',
+        gemini: data.geminiApiKeyMasked || '',
+      });
+    } catch (err: any) {
+      console.error('Failed to load AI config:', err);
+    } finally {
+      setIsLoadingAiConfig(false);
+    }
+  }, []);
+
+  const fetchAiUsage = useCallback(async () => {
+    setIsLoadingAiUsage(true);
+    try {
+      const data = await apiRequest<any>('/api/v1/admin/ai/usage');
+      setAiUsage(data);
+    } catch (err: any) {
+      console.error('Failed to load AI usage stats:', err);
+    } finally {
+      setIsLoadingAiUsage(false);
+    }
+  }, []);
+
   // Initial load: Fetch overview, users, clients, and health immediately
   useEffect(() => {
     fetchOverview();
     fetchUsers();
     fetchClients();
     fetchHealth();
-  }, [fetchOverview, fetchUsers, fetchClients, fetchHealth]);
+    fetchAiConfig();
+  }, [fetchOverview, fetchUsers, fetchClients, fetchHealth, fetchAiConfig]);
 
   useEffect(() => {
+    if (activeTab === 'ai') {
+      fetchAiConfig();
+      fetchAiUsage();
+    }
     if (activeTab === 'users') fetchUsers();
     if (activeTab === 'clients') fetchClients();
     if (activeTab === 'flags') fetchFlags();
     if (activeTab === 'audit') fetchAuditLogs();
-  }, [activeTab, fetchUsers, fetchClients, fetchFlags, fetchAuditLogs]);
+  }, [activeTab, fetchAiConfig, fetchAiUsage, fetchUsers, fetchClients, fetchFlags, fetchAuditLogs]);
+
+  const handleUpdateAiConfig = async (patch: any) => {
+    setIsSavingAi(true);
+    setActionError(null);
+    try {
+      const updated = await apiRequest<any>('/api/v1/admin/ai/config', {
+        method: 'POST',
+        body: JSON.stringify(patch),
+      });
+      setAiConfig(updated);
+      setAiKeyInputs({
+        anthropic: updated.anthropicApiKeyMasked || '',
+        openai: updated.openaiApiKeyMasked || '',
+        gemini: updated.geminiApiKeyMasked || '',
+      });
+      setEditingKey({});
+      setActionSuccess('Platform AI Configuration updated successfully.');
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to update AI configuration');
+    } finally {
+      setIsSavingAi(false);
+    }
+  };
+
+  const handleTestConnection = async (provider: string, testKey?: string, model?: string) => {
+    setTestStatus((prev) => ({ ...prev, [provider]: { testing: true } }));
+    try {
+      const res = await apiRequest<any>('/api/v1/admin/ai/test', {
+        method: 'POST',
+        body: JSON.stringify({ provider, testKey, model }),
+      });
+      setTestStatus((prev) => ({ ...prev, [provider]: { testing: false, ...res } }));
+      if (res.success) {
+        setActionSuccess(res.message || `${provider} API connection verified successfully.`);
+      } else {
+        setActionError(res.error || `Failed to verify ${provider} API connection.`);
+      }
+    } catch (err: any) {
+      setTestStatus((prev) => ({ ...prev, [provider]: { testing: false, success: false, error: err.message } }));
+      setActionError(err.message || `Failed to verify ${provider} API connection.`);
+    }
+  };
+
+  const handleTriggerEmergencyStop = async () => {
+    try {
+      await apiRequest('/api/v1/admin/ai/emergency-stop', {
+        method: 'POST',
+        body: JSON.stringify({ reason: emergencyStopReasonInput }),
+      });
+      setShowEmergencyStopModal(false);
+      setEmergencyStopReasonInput('');
+      setActionSuccess('Global AI Emergency Killswitch has been activated.');
+      fetchAiConfig();
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to activate emergency stop');
+    }
+  };
+
+  const handleResumeAi = async () => {
+    try {
+      await apiRequest('/api/v1/admin/ai/resume', { method: 'POST' });
+      setActionSuccess('Global AI operations resumed successfully.');
+      fetchAiConfig();
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to resume AI operations');
+    }
+  };
 
   // Quick 1-Click Approve Free User to Paid Plan
   const handleQuickApproveUser = async (u: any, targetPlan = 'PROFESSIONAL') => {
@@ -364,9 +493,10 @@ export function PlatformAdmin() {
       )}
 
       {/* Primary Light Navigation Tabs */}
-      <div className="bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center gap-1">
+      <div className="neu-well p-1.5 rounded-2xl flex flex-wrap items-center gap-1.5">
         {[
           { id: 'overview', label: 'Executive Overview', icon: BarChart3 },
+          { id: 'ai', label: 'AI Control Center', icon: Cpu },
           { id: 'users', label: `All Users (${totalRegisteredCount})`, icon: Users },
           { id: 'clients', label: `Client Portal Users (${totalClientCount})`, icon: Briefcase },
           { id: 'flags', label: 'Feature Flags', icon: Sliders },
@@ -379,11 +509,12 @@ export function PlatformAdmin() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 scale-[1.01]'
-                  : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
-              }`}
+                  ? 'neu-button-primary text-white'
+                  : 'text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
+              )}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
@@ -520,7 +651,748 @@ export function PlatformAdmin() {
         </div>
       )}
 
-      {/* TAB 2: USERS & SUBSCRIPTIONS TABLE */}
+      {/* TAB 2: AI CONTROL CENTER */}
+      {activeTab === 'ai' && (
+        <div className="space-y-8 animate-fade-in">
+          {/* Section 1: Master Killswitch & Emergency Stop */}
+          {aiConfig?.emergencyStopActive ? (
+            <div className="neu-card p-6 md:p-8 rounded-3xl border-2 border-rose-500/50 bg-rose-500/5 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3.5 rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-600/30 animate-pulse">
+                  <Power className="w-7 h-7" />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xl font-black text-rose-600 tracking-tight">
+                      GLOBAL EMERGENCY KILLSWITCH ENGAGED
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">
+                      All AI Suspended
+                    </span>
+                  </div>
+                  <p className="text-xs md:text-sm text-slate-600 font-medium">
+                    Reason: <strong>{aiConfig.emergencyStopReason || 'Halted by administrator'}</strong>
+                  </p>
+                  {aiConfig.emergencyStopAt && (
+                    <p className="text-[11px] text-slate-400 font-mono">
+                      Engaged on: {new Date(aiConfig.emergencyStopAt).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <button
+                onClick={handleResumeAi}
+                className="neu-button-primary px-6 py-3 rounded-2xl text-xs font-bold text-white flex items-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20 bg-emerald-600 hover:bg-emerald-700 transition-all hover:scale-105"
+              >
+                <Play className="w-4 h-4 fill-current" />
+                <span>Resume AI Operations</span>
+              </button>
+            </div>
+          ) : (
+            <div className="neu-card p-6 md:p-8 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+              <div className="flex items-center gap-4">
+                <div className={cn(
+                  "p-3.5 rounded-2xl text-white shadow-lg",
+                  aiConfig?.aiEnabled ? "bg-indigo-600 shadow-indigo-600/20" : "bg-slate-500 shadow-slate-500/20"
+                )}>
+                  <Cpu className="w-7 h-7" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xl font-black text-[var(--neu-text-primary)] tracking-tight">
+                      Autonomous AI Marketing Engine
+                    </h2>
+                    <span className={cn(
+                      "px-3 py-1 rounded-full text-xs font-bold border shadow-xs",
+                      aiConfig?.aiEnabled
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
+                    )}>
+                      {aiConfig?.aiEnabled ? 'Master Switch: ACTIVE' : 'Master Switch: DISABLED'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[var(--neu-text-secondary)] font-medium mt-1">
+                    Centralized platform governance for AI providers, credentials, model routing, and cost control.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  onClick={() => handleUpdateAiConfig({ aiEnabled: !aiConfig?.aiEnabled })}
+                  disabled={isSavingAi}
+                  className={cn(
+                    "px-5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
+                    aiConfig?.aiEnabled
+                      ? "neu-inset text-emerald-600 font-extrabold"
+                      : "neu-card text-slate-500 hover:text-slate-800"
+                  )}
+                >
+                  <Power className="w-4 h-4" />
+                  <span>{aiConfig?.aiEnabled ? 'Disable AI Platform-Wide' : 'Enable AI Platform-Wide'}</span>
+                </button>
+
+                <button
+                  onClick={() => setShowEmergencyStopModal(true)}
+                  className="px-5 py-2.5 rounded-2xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200/80 transition-all cursor-pointer flex items-center gap-2 shadow-xs hover:scale-105 active:scale-95"
+                >
+                  <Square className="w-4 h-4 fill-current" />
+                  <span>Emergency Killswitch</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Section 2: Active Provider & Strategy Selection */}
+          <div className="neu-card p-6 md:p-8 rounded-3xl space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-extrabold text-[var(--neu-text-primary)]">
+                  Active AI Orchestration Mode
+                </h3>
+                <p className="text-xs text-[var(--neu-text-secondary)] font-medium mt-0.5">
+                  Choose whether to use unified smart routing or force all tasks through a specific provider.
+                </p>
+              </div>
+
+              <span className="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-xl">
+                Current: {aiConfig?.activeProvider?.toUpperCase() || 'SMART_ROUTING'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                {
+                  id: 'smart_routing',
+                  name: 'Smart Hybrid Routing',
+                  desc: 'Auto-routes lightweight tasks to fast models and complex strategy to advanced reasoning models.',
+                  badge: 'Recommended',
+                },
+                {
+                  id: 'anthropic',
+                  name: 'Anthropic Claude',
+                  desc: 'Route all execution strictly through Claude 3.5 Sonnet & Claude 3.5 Haiku.',
+                  badge: aiConfig?.hasAnthropicKey ? 'Configured' : 'No Key',
+                },
+                {
+                  id: 'openai',
+                  name: 'OpenAI GPT-4o',
+                  desc: 'Route all execution strictly through OpenAI GPT-4o & GPT-4o-mini.',
+                  badge: aiConfig?.hasOpenaiKey ? 'Configured' : 'No Key',
+                },
+                {
+                  id: 'gemini',
+                  name: 'Google Gemini',
+                  desc: 'Route all execution strictly through Google Gemini 1.5 Pro & Flash.',
+                  badge: aiConfig?.hasGeminiKey ? 'Configured' : 'No Key',
+                },
+              ].map((prov) => {
+                const isSelected = aiConfig?.activeProvider === prov.id;
+                return (
+                  <div
+                    key={prov.id}
+                    onClick={() => handleUpdateAiConfig({ activeProvider: prov.id })}
+                    className={cn(
+                      "p-5 rounded-2xl transition-all cursor-pointer relative flex flex-col justify-between gap-3 border",
+                      isSelected
+                        ? "neu-inset border-indigo-500/40 shadow-inner bg-indigo-50/20"
+                        : "neu-card border-transparent hover:border-slate-300"
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-[var(--neu-text-primary)]">
+                        {prov.name}
+                      </span>
+                      <span className={cn(
+                        "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                        isSelected
+                          ? "bg-indigo-600 text-white"
+                          : prov.badge === 'Configured'
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-slate-100 text-slate-600"
+                      )}>
+                        {isSelected ? 'Active' : prov.badge}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--neu-text-secondary)] font-medium leading-relaxed">
+                      {prov.desc}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Section 3: Provider API Keys & Health Check Pings */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Anthropic Card */}
+            <div className="neu-card p-6 rounded-3xl space-y-5 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-orange-100 text-orange-700 font-black text-xs flex items-center justify-center">
+                      CL
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-extrabold text-[var(--neu-text-primary)]">Anthropic Claude</h4>
+                      <p className="text-[11px] text-[var(--neu-text-secondary)]">Sonnet 3.5 & Haiku 3.5</p>
+                    </div>
+                  </div>
+                  <span className={cn(
+                    "text-[10px] font-bold px-2.5 py-1 rounded-full",
+                    aiConfig?.hasAnthropicKey ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                  )}>
+                    {aiConfig?.hasAnthropicKey ? 'Key Configured' : 'Missing Key'}
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-[var(--neu-text-secondary)] block">
+                    API Key (Stored Encrypted AES-256)
+                  </label>
+                  {editingKey['anthropic'] ? (
+                    <div className="space-y-2">
+                      <input
+                        type="password"
+                        placeholder="sk-ant-api03-..."
+                        value={aiKeyInputs.anthropic}
+                        onChange={(e) => setAiKeyInputs((prev) => ({ ...prev, anthropic: e.target.value }))}
+                        className="neu-input w-full p-2.5 text-xs font-mono rounded-xl"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => setEditingKey((prev) => ({ ...prev, anthropic: false }))}
+                          className="px-3 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-700"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleUpdateAiConfig({ anthropicApiKey: aiKeyInputs.anthropic })}
+                          className="neu-button-primary px-3 py-1 rounded-xl text-[11px] font-bold text-white"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between p-2.5 rounded-xl neu-inset">
+                      <span className="text-xs font-mono text-[var(--neu-text-primary)]">
+                        {aiConfig?.anthropicApiKeyMasked || 'Not configured'}
+                      </span>
+                      <button
+                        onClick={() => setEditingKey((prev) => ({ ...prev, anthropic: true }))}
+                        className="text-[11px] font-bold text-indigo-600 hover:underline cursor-pointer"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between">
+                <button
+                  onClick={() => handleTestConnection('anthropic')}
+                  disabled={testStatus['anthropic']?.testing}
+                  className="px-3.5 py-1.5 rounded-xl text-[11px] font-bold neu-card hover:bg-slate-100 transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <RefreshCw className={cn("w-3.5 h-3.5", testStatus['anthropic']?.testing && "animate-spin")} />
+                  <span>Test Connection</span>
+                </button>
+
+                {testStatus['anthropic'] && !testStatus['anthropic'].testing && (
+                  <span className={cn(
+                    "text-[10px] font-bold",
+                    testStatus['anthropic'].success ? "text-emerald-600" : "text-rose-600"
+                  )}>
+                    {testStatus['anthropic'].success
+                      ? `✓ ${testStatus['anthropic'].latencyMs}ms`
+                      : '✗ Failed'}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* OpenAI Card */}
+            <div className="neu-card p-6 rounded-3xl space-y-5 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 font-black text-xs flex items-center justify-center">
+                      OA
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-extrabold text-[var(--neu-text-primary)]">OpenAI</h4>
+                      <p className="text-[11px] text-[var(--neu-text-secondary)]">GPT-4o & GPT-4o-mini</p>
+                    </div>
+                  </div>
+                  <span className={cn(
+                    "text-[10px] font-bold px-2.5 py-1 rounded-full",
+                    aiConfig?.hasOpenaiKey ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                  )}>
+                    {aiConfig?.hasOpenaiKey ? 'Key Configured' : 'Missing Key'}
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-[var(--neu-text-secondary)] block">
+                    API Key (Stored Encrypted AES-256)
+                  </label>
+                  {editingKey['openai'] ? (
+                    <div className="space-y-2">
+                      <input
+                        type="password"
+                        placeholder="sk-proj-..."
+                        value={aiKeyInputs.openai}
+                        onChange={(e) => setAiKeyInputs((prev) => ({ ...prev, openai: e.target.value }))}
+                        className="neu-input w-full p-2.5 text-xs font-mono rounded-xl"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => setEditingKey((prev) => ({ ...prev, openai: false }))}
+                          className="px-3 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-700"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleUpdateAiConfig({ openaiApiKey: aiKeyInputs.openai })}
+                          className="neu-button-primary px-3 py-1 rounded-xl text-[11px] font-bold text-white"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between p-2.5 rounded-xl neu-inset">
+                      <span className="text-xs font-mono text-[var(--neu-text-primary)]">
+                        {aiConfig?.openaiApiKeyMasked || 'Not configured'}
+                      </span>
+                      <button
+                        onClick={() => setEditingKey((prev) => ({ ...prev, openai: true }))}
+                        className="text-[11px] font-bold text-indigo-600 hover:underline cursor-pointer"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between">
+                <button
+                  onClick={() => handleTestConnection('openai')}
+                  disabled={testStatus['openai']?.testing}
+                  className="px-3.5 py-1.5 rounded-xl text-[11px] font-bold neu-card hover:bg-slate-100 transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <RefreshCw className={cn("w-3.5 h-3.5", testStatus['openai']?.testing && "animate-spin")} />
+                  <span>Test Connection</span>
+                </button>
+
+                {testStatus['openai'] && !testStatus['openai'].testing && (
+                  <span className={cn(
+                    "text-[10px] font-bold",
+                    testStatus['openai'].success ? "text-emerald-600" : "text-rose-600"
+                  )}>
+                    {testStatus['openai'].success
+                      ? `✓ ${testStatus['openai'].latencyMs}ms`
+                      : '✗ Failed'}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Google Gemini Card */}
+            <div className="neu-card p-6 rounded-3xl space-y-5 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">
+                      GG
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-extrabold text-[var(--neu-text-primary)]">Google Gemini</h4>
+                      <p className="text-[11px] text-[var(--neu-text-secondary)]">Gemini 1.5 Pro & Flash</p>
+                    </div>
+                  </div>
+                  <span className={cn(
+                    "text-[10px] font-bold px-2.5 py-1 rounded-full",
+                    aiConfig?.hasGeminiKey ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                  )}>
+                    {aiConfig?.hasGeminiKey ? 'Key Configured' : 'Missing Key'}
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-[var(--neu-text-secondary)] block">
+                    API Key (Stored Encrypted AES-256)
+                  </label>
+                  {editingKey['gemini'] ? (
+                    <div className="space-y-2">
+                      <input
+                        type="password"
+                        placeholder="AIzaSy..."
+                        value={aiKeyInputs.gemini}
+                        onChange={(e) => setAiKeyInputs((prev) => ({ ...prev, gemini: e.target.value }))}
+                        className="neu-input w-full p-2.5 text-xs font-mono rounded-xl"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => setEditingKey((prev) => ({ ...prev, gemini: false }))}
+                          className="px-3 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-700"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleUpdateAiConfig({ geminiApiKey: aiKeyInputs.gemini })}
+                          className="neu-button-primary px-3 py-1 rounded-xl text-[11px] font-bold text-white"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between p-2.5 rounded-xl neu-inset">
+                      <span className="text-xs font-mono text-[var(--neu-text-primary)]">
+                        {aiConfig?.geminiApiKeyMasked || 'Not configured'}
+                      </span>
+                      <button
+                        onClick={() => setEditingKey((prev) => ({ ...prev, gemini: true }))}
+                        className="text-[11px] font-bold text-indigo-600 hover:underline cursor-pointer"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between">
+                <button
+                  onClick={() => handleTestConnection('gemini')}
+                  disabled={testStatus['gemini']?.testing}
+                  className="px-3.5 py-1.5 rounded-xl text-[11px] font-bold neu-card hover:bg-slate-100 transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <RefreshCw className={cn("w-3.5 h-3.5", testStatus['gemini']?.testing && "animate-spin")} />
+                  <span>Test Connection</span>
+                </button>
+
+                {testStatus['gemini'] && !testStatus['gemini'].testing && (
+                  <span className={cn(
+                    "text-[10px] font-bold",
+                    testStatus['gemini'].success ? "text-emerald-600" : "text-rose-600"
+                  )}>
+                    {testStatus['gemini'].success
+                      ? `✓ ${testStatus['gemini'].latencyMs}ms`
+                      : '✗ Failed'}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Model Complexity Routing Matrix & Global Feature Flags */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Model Routing Matrix */}
+            <div className="neu-card p-6 md:p-8 rounded-3xl space-y-6">
+              <div>
+                <h3 className="text-base font-extrabold text-[var(--neu-text-primary)]">
+                  Model Complexity Routing
+                </h3>
+                <p className="text-xs text-[var(--neu-text-secondary)] font-medium mt-0.5">
+                  Assign optimal AI models based on task computational requirements.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="neu-well p-4 rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[var(--neu-text-primary)]">
+                      ⚡ Lightweight Tasks
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-500">
+                      Captions, Hashtags, Hooks, Quick QA
+                    </span>
+                  </div>
+                  <select
+                    value={aiConfig?.lightweightModel || 'claude-3-5-haiku-20241022'}
+                    onChange={(e) => handleUpdateAiConfig({ lightweightModel: e.target.value })}
+                    className="neu-input w-full p-2.5 text-xs font-bold rounded-xl"
+                  >
+                    <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (Fastest, High Quality)</option>
+                    <option value="gpt-4o-mini">OpenAI GPT-4o-mini (Cost-Efficient)</option>
+                    <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Ultra High Speed)</option>
+                    <option value="gemini-2.0-flash">Google Gemini 2.0 Flash</option>
+                  </select>
+                </div>
+
+                <div className="neu-well p-4 rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[var(--neu-text-primary)]">
+                      🧠 Advanced Reasoning Tasks
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-500">
+                      Strategy, Content Plans, Ad Optimization
+                    </span>
+                  </div>
+                  <select
+                    value={aiConfig?.advancedModel || 'claude-3-5-sonnet-20241022'}
+                    onChange={(e) => handleUpdateAiConfig({ advancedModel: e.target.value })}
+                    className="neu-input w-full p-2.5 text-xs font-bold rounded-xl"
+                  >
+                    <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (Superior Marketing Reasoning)</option>
+                    <option value="gpt-4o">OpenAI GPT-4o (Omni Reasoning)</option>
+                    <option value="gemini-1.5-pro">Google Gemini 1.5 Pro (Deep Context)</option>
+                    <option value="o1-mini">OpenAI o1-mini (Specialized Math & Logic)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Global Feature Flags */}
+            <div className="neu-card p-6 md:p-8 rounded-3xl space-y-6">
+              <div>
+                <h3 className="text-base font-extrabold text-[var(--neu-text-primary)]">
+                  Global AI Feature Governance
+                </h3>
+                <p className="text-xs text-[var(--neu-text-secondary)] font-medium mt-0.5">
+                  Platform-wide access toggles for specific autonomous subsystems.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  {
+                    key: 'captionGenerationEnabled',
+                    label: 'Caption & Copywriting Generation',
+                    desc: 'Allow users and autonomous agents to generate multi-channel captions and hooks.',
+                  },
+                  {
+                    key: 'strategyGenerationEnabled',
+                    label: 'Autonomous Marketing Strategy & Planning',
+                    desc: 'Allow autonomous generation of multi-day marketing calendars and strategies.',
+                  },
+                  {
+                    key: 'autoSchedulingEnabled',
+                    label: 'Autonomous Post Scheduling',
+                    desc: 'Permit agents to automatically place approved drafts into scheduled queues.',
+                  },
+                  {
+                    key: 'adOptimizationEnabled',
+                    label: 'Meta Ad Campaign Optimization',
+                    desc: 'Allow autonomous budget allocation and ad guardrail adjustments.',
+                  },
+                  {
+                    key: 'imageGenerationEnabled',
+                    label: 'AI Image & Creative Generation',
+                    desc: 'Enable generative image creation and creative studio workflows.',
+                  },
+                ].map((feat) => {
+                  const isEnabled = aiConfig?.[feat.key] ?? true;
+                  return (
+                    <div
+                      key={feat.key}
+                      onClick={() => handleUpdateAiConfig({ [feat.key]: !isEnabled })}
+                      className="p-3.5 rounded-2xl neu-well flex items-center justify-between gap-4 cursor-pointer hover:opacity-90 transition-all"
+                    >
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-[var(--neu-text-primary)] block">
+                          {feat.label}
+                        </span>
+                        <p className="text-[11px] text-[var(--neu-text-secondary)]">
+                          {feat.desc}
+                        </p>
+                      </div>
+
+                      <div className={cn(
+                        "w-10 h-6 rounded-full transition-colors flex items-center p-0.5 shrink-0",
+                        isEnabled ? "bg-indigo-600 justify-end" : "bg-slate-300 dark:bg-slate-700 justify-start"
+                      )}>
+                        <div className="w-5 h-5 rounded-full bg-white shadow-md" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Section 5: Spending Limits & Monthly Cap Governance */}
+          <div className="neu-card p-6 md:p-8 rounded-3xl space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-base font-extrabold text-[var(--neu-text-primary)]">
+                  Platform Cost & Usage Governance
+                </h3>
+                <p className="text-xs text-[var(--neu-text-secondary)] font-medium mt-0.5">
+                  Protect against runaway API spending with strict monthly cost caps and automatic circuit breakers.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-500">Current Month Spend:</span>
+                <span className="text-sm font-black text-indigo-600">
+                  ${aiUsage?.currentMonthSpendUsd?.toFixed(2) || '0.00'}
+                </span>
+                <span className="text-xs text-slate-400">/ ${aiConfig?.monthlyCostCapUsd || 500}</span>
+              </div>
+            </div>
+
+            {/* Spend Progress Bar */}
+            <div className="space-y-2">
+              <div className="w-full h-3 rounded-full neu-inset overflow-hidden p-0.5">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-indigo-500 to-rose-500 transition-all duration-500"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      Math.round(
+                        ((aiUsage?.currentMonthSpendUsd || 0) / (aiConfig?.monthlyCostCapUsd || 500)) * 100
+                      )
+                    )}%`,
+                  }}
+                />
+              </div>
+              <div className="flex justify-between text-[11px] font-bold text-slate-400">
+                <span>$0.00</span>
+                <span>
+                  {Math.round(
+                    ((aiUsage?.currentMonthSpendUsd || 0) / (aiConfig?.monthlyCostCapUsd || 500)) * 100
+                  )}% of Monthly Cap Utilized
+                </span>
+                <span>${aiConfig?.monthlyCostCapUsd || 500}.00 Cap</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[var(--neu-text-primary)] block">
+                  Monthly Platform Cost Cap ($ USD)
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="number"
+                    defaultValue={aiConfig?.monthlyCostCapUsd || 500}
+                    onBlur={(e) => handleUpdateAiConfig({ monthlyCostCapUsd: Number(e.target.value) })}
+                    className="neu-input w-full p-2.5 text-xs font-bold rounded-xl"
+                  />
+                  <span className="text-xs font-bold text-slate-500 self-center">USD</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[var(--neu-text-primary)] block">
+                  Daily Token Safety Ceiling
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="number"
+                    defaultValue={aiConfig?.dailyTokenLimit || 5000000}
+                    onBlur={(e) => handleUpdateAiConfig({ dailyTokenLimit: Number(e.target.value) })}
+                    className="neu-input w-full p-2.5 text-xs font-bold rounded-xl"
+                  />
+                  <span className="text-xs font-bold text-slate-500 self-center">Tokens</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 6: Real-Time Usage Analytics Telemetry */}
+          <div className="neu-card p-6 md:p-8 rounded-3xl space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-extrabold text-[var(--neu-text-primary)]">
+                  Live AI Usage Telemetry (Past 30 Days)
+                </h3>
+                <p className="text-xs text-[var(--neu-text-secondary)] font-medium mt-0.5">
+                  Aggregate telemetry tracked across all organizations, workspaces, and background jobs.
+                </p>
+              </div>
+
+              <button
+                onClick={fetchAiUsage}
+                disabled={isLoadingAiUsage}
+                className="p-2 rounded-xl neu-card hover:bg-slate-100 transition-all text-slate-600"
+                title="Refresh usage stats"
+              >
+                <RefreshCw className={cn("w-4 h-4", isLoadingAiUsage && "animate-spin")} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="neu-well p-5 rounded-2xl space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Spend (30d)</span>
+                <p className="text-2xl font-black text-indigo-600">
+                  ${aiUsage?.totalCostUsd?.toFixed(4) || '0.0000'}
+                </p>
+              </div>
+
+              <div className="neu-well p-5 rounded-2xl space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Tokens</span>
+                <p className="text-2xl font-black text-slate-800 dark:text-white">
+                  {(aiUsage?.totalTokens || 0).toLocaleString()}
+                </p>
+              </div>
+
+              <div className="neu-well p-5 rounded-2xl space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Input Tokens</span>
+                <p className="text-2xl font-black text-slate-800 dark:text-white">
+                  {(aiUsage?.totalInputTokens || 0).toLocaleString()}
+                </p>
+              </div>
+
+              <div className="neu-well p-5 rounded-2xl space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Operations Executed</span>
+                <p className="text-2xl font-black text-slate-800 dark:text-white">
+                  {(aiUsage?.recordsCount || 0).toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            {/* Provider and Feature Breakdowns */}
+            {aiUsage && Object.keys(aiUsage.byProvider || {}).length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                <div className="neu-well p-5 rounded-2xl space-y-3">
+                  <h4 className="text-xs font-extrabold text-[var(--neu-text-primary)] uppercase tracking-wider">
+                    Breakdown By Provider
+                  </h4>
+                  <div className="space-y-2">
+                    {Object.entries(aiUsage.byProvider).map(([prov, data]: [string, any]) => (
+                      <div key={prov} className="flex items-center justify-between text-xs py-1.5 border-b border-black/5 dark:border-white/5 last:border-0">
+                        <span className="font-bold text-[var(--neu-text-primary)] capitalize">{prov}</span>
+                        <div className="flex items-center gap-4 text-slate-500 font-mono text-[11px]">
+                          <span>{data.count} calls</span>
+                          <span>{data.tokens.toLocaleString()} tok</span>
+                          <span className="font-bold text-indigo-600">${data.cost.toFixed(4)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="neu-well p-5 rounded-2xl space-y-3">
+                  <h4 className="text-xs font-extrabold text-[var(--neu-text-primary)] uppercase tracking-wider">
+                    Breakdown By Agent Feature
+                  </h4>
+                  <div className="space-y-2">
+                    {Object.entries(aiUsage.byFeature || {}).map(([feat, data]: [string, any]) => (
+                      <div key={feat} className="flex items-center justify-between text-xs py-1.5 border-b border-black/5 dark:border-white/5 last:border-0">
+                        <span className="font-bold text-[var(--neu-text-primary)]">{feat}</span>
+                        <div className="flex items-center gap-4 text-slate-500 font-mono text-[11px]">
+                          <span>{data.count} calls</span>
+                          <span className="font-bold text-indigo-600">${data.cost.toFixed(4)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: USERS & SUBSCRIPTIONS TABLE */}
       {activeTab === 'users' && (
         <div className="space-y-6 animate-fade-in">
           {/* Table Control Header */}
@@ -1190,6 +2062,57 @@ export function PlatformAdmin() {
                 className="px-5 py-2.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-md shadow-blue-600/20 transition-all hover:scale-105"
               >
                 Grant Credits
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: AI Emergency Stop Confirmation */}
+      {showEmergencyStopModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-md bg-white rounded-3xl p-6 md:p-8 border border-rose-200 shadow-2xl space-y-6">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="p-3 rounded-2xl bg-rose-100">
+                <AlertCircle className="w-6 h-6 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900">
+                  Trigger Global AI Emergency Stop
+                </h3>
+                <p className="text-xs text-rose-600 font-semibold">Immediate Platform-Wide AI Freeze</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 font-medium leading-relaxed">
+              This action will immediately halt all autonomous agents, daily cycles, content generation, and ad optimizations across all tenant workspaces.
+            </p>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-700 block">
+                Administrative Reason for Killswitch
+              </label>
+              <textarea
+                rows={3}
+                placeholder="e.g. Rate limit breach investigation, API key rotation, or quality audit"
+                value={emergencyStopReasonInput}
+                onChange={(e) => setEmergencyStopReasonInput(e.target.value)}
+                className="w-full p-3 text-xs font-semibold rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 focus:ring-2 focus:ring-rose-500 resize-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => setShowEmergencyStopModal(false)}
+                className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-2xl cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleTriggerEmergencyStop}
+                className="px-5 py-2.5 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-2xl shadow-lg shadow-rose-600/30 transition-all hover:scale-105 cursor-pointer"
+              >
+                Engage Emergency Killswitch
               </button>
             </div>
           </div>

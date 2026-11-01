@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PenSquare, CalendarDays, Image, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, PenSquare, CalendarDays, Bot, MoreHorizontal, Plus } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
 
@@ -9,10 +9,10 @@ interface BottomNavigationProps {
 }
 
 const bottomTabs = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/app', end: true },
-  { icon: PenSquare, label: 'Studio', path: '/app/studio', end: false },
+  { icon: LayoutDashboard, label: 'Overview', path: '/app', end: true },
   { icon: CalendarDays, label: 'Calendar', path: '/app/calendar', end: false },
-  { icon: Image, label: 'Assets', path: '/app/assets', end: false },
+  { icon: Plus, label: 'Create', path: '/app/studio', isPrimary: true },
+  { icon: Bot, label: 'AI', path: '/app/ai', end: false },
 ];
 
 export function BottomNavigation({ onMoreClick }: BottomNavigationProps) {
@@ -20,12 +20,25 @@ export function BottomNavigation({ onMoreClick }: BottomNavigationProps) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-gray-200 safe-bottom lg:hidden"
+      className="fixed bottom-3 left-3 right-3 z-40 neu-card rounded-3xl p-1.5 safe-bottom lg:hidden bg-[var(--neu-surface)]"
       role="navigation"
       aria-label="Mobile navigation"
     >
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+      <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-1">
         {bottomTabs.map((tab) => {
+          if (tab.isPrimary) {
+            return (
+              <NavLink
+                key={tab.path}
+                to={tab.path}
+                className="flex items-center justify-center -mt-5 neu-button-primary w-12 h-12 rounded-full text-white shadow-lg active:scale-95 transition-transform"
+                aria-label="Create Post"
+              >
+                <Plus className="w-6 h-6" />
+              </NavLink>
+            );
+          }
+
           const isActive = tab.end
             ? location.pathname === tab.path
             : location.pathname.startsWith(tab.path);
@@ -35,30 +48,14 @@ export function BottomNavigation({ onMoreClick }: BottomNavigationProps) {
               key={tab.path}
               to={tab.path}
               end={tab.end}
-              className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 relative touch-target"
+              className={cn(
+                'flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-2xl transition-all touch-target',
+                isActive ? 'neu-button-inset text-blue-500' : 'text-[var(--neu-text-muted)] hover:text-[var(--neu-text-primary)]',
+              )}
               aria-label={tab.label}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="bottomnav-indicator"
-                  className="absolute -top-px left-1/2 -translate-x-1/2 w-8 h-0.5 bg-brand-600 rounded-full"
-                  transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
-                />
-              )}
-              <tab.icon
-                className={cn(
-                  'w-5 h-5 transition-colors',
-                  isActive ? 'text-brand-600' : 'text-gray-400'
-                )}
-              />
-              <span
-                className={cn(
-                  'text-[10px] font-semibold transition-colors',
-                  isActive ? 'text-brand-700' : 'text-gray-500'
-                )}
-              >
-                {tab.label}
-              </span>
+              <tab.icon className="w-4.5 h-4.5" />
+              <span className="text-[10px] font-bold">{tab.label}</span>
             </NavLink>
           );
         })}
@@ -66,11 +63,11 @@ export function BottomNavigation({ onMoreClick }: BottomNavigationProps) {
         {/* More tab */}
         <button
           onClick={onMoreClick}
-          className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 touch-target"
+          className="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-2xl text-[var(--neu-text-muted)] hover:text-[var(--neu-text-primary)] transition-all touch-target cursor-pointer"
           aria-label="More navigation options"
         >
-          <MoreHorizontal className="w-5 h-5 text-gray-400" />
-          <span className="text-[10px] font-semibold text-gray-500">More</span>
+          <MoreHorizontal className="w-4.5 h-4.5" />
+          <span className="text-[10px] font-bold">More</span>
         </button>
       </div>
     </nav>

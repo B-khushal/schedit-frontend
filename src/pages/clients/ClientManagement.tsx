@@ -273,7 +273,7 @@ export function ClientManagement() {
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Assign Projects
             </label>
-            <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-gray-50/50 space-y-2">
+            <div className="max-h-40 overflow-y-auto neu-well rounded-xl p-3 space-y-2">
               {currentOrg?.projects?.map((project) => (
                 <label
                   key={project.id}

@@ -345,15 +345,15 @@ export function MediaLibrary() {
   }, [assets]);
 
   return (
-    <div className="min-h-[calc(100dvh-3.5rem)] lg:h-[calc(100vh-3.5rem)] flex flex-col lg:flex-row bg-gray-50/50 w-full overflow-x-hidden lg:overflow-hidden text-left font-sans select-none relative">
+    <div className="min-h-[calc(100dvh-3.5rem)] lg:h-[calc(100vh-3.5rem)] flex flex-col lg:flex-row bg-[var(--neu-bg)] w-full overflow-x-hidden lg:overflow-hidden text-left font-sans select-none relative p-3 sm:p-4 gap-4">
       
       {/* ── SIDE PANEL ─────────────────────────────────────────── */}
-      <div className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-200 bg-white flex flex-col shrink-0 max-h-72 lg:max-h-none">
-        <div className="p-4 shrink-0 border-b border-gray-100 flex items-center justify-between">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Content Library</span>
+      <div className="w-full lg:w-64 neu-card rounded-2xl flex flex-col shrink-0 max-h-72 lg:max-h-none overflow-hidden">
+        <div className="p-4 shrink-0 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
+          <span className="text-xs font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider">Content Library</span>
           <button 
             onClick={() => setIsCreateFolderOpen(true)}
-            className="p-1 hover:bg-gray-100 rounded-md text-brand-600 hover:text-brand-700 cursor-pointer"
+            className="p-1.5 neu-raised hover:neu-raised-lg rounded-xl text-blue-600 cursor-pointer"
             title="Create Folder"
           >
             <Folder className="w-4 h-4" />
@@ -363,19 +363,19 @@ export function MediaLibrary() {
         <div className="flex-1 overflow-y-auto p-3.5 space-y-4 lg:space-y-6">
           {/* Folders Navigation */}
           <div className="space-y-1.5">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2.5">Folders</p>
+            <p className="text-[10px] font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider pl-2.5">Folders</p>
             {folders.map((fold) => (
               <button
                 key={fold}
                 onClick={() => { setSelectedFolder(fold); setSelectedTag(''); }}
                 className={cn(
-                  "w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer capitalize",
+                  "w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer capitalize",
                   selectedFolder === fold 
-                    ? "bg-brand-50 text-brand-700 shadow-xs" 
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "neu-button-primary text-white" 
+                    : "text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)] hover:bg-black/5 dark:hover:bg-white/5"
                 )}
               >
-                <Folder className={cn("w-4 h-4 shrink-0", selectedFolder === fold ? "text-brand-600" : "text-gray-400")} />
+                <Folder className={cn("w-4 h-4 shrink-0", selectedFolder === fold ? "text-white" : "text-gray-400")} />
                 <span className="truncate">{fold === 'all' ? 'All Workspace Assets' : fold}</span>
               </button>
             ))}
@@ -383,7 +383,7 @@ export function MediaLibrary() {
 
           {/* Quick Filters */}
           <div className="space-y-1.5">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2.5">Quick Filters</p>
+            <p className="text-[10px] font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider pl-2.5">Quick Filters</p>
             {[
               { id: 'all', label: 'All Library Assets', icon: LayoutGrid },
               { id: 'favorites', label: 'Favorites', icon: Star },
@@ -393,13 +393,13 @@ export function MediaLibrary() {
                 key={filt.id}
                 onClick={() => setSelectedFilter(filt.id as any)}
                 className={cn(
-                  "w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer",
+                  "w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer",
                   selectedFilter === filt.id
-                    ? "bg-brand-50 text-brand-700 shadow-xs"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "neu-button-primary text-white"
+                    : "text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)] hover:bg-black/5 dark:hover:bg-white/5"
                 )}
               >
-                <filt.icon className={cn("w-4 h-4 shrink-0", selectedFilter === filt.id ? "text-brand-600" : "text-gray-400")} />
+                <filt.icon className={cn("w-4 h-4 shrink-0", selectedFilter === filt.id ? "text-white" : "text-gray-400")} />
                 <span>{filt.label}</span>
               </button>
             ))}
@@ -407,7 +407,7 @@ export function MediaLibrary() {
 
           {/* Asset Type */}
           <div className="space-y-1.5">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2.5">Asset Type</p>
+            <p className="text-[10px] font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider pl-2.5">Asset Type</p>
             {[
               { id: 'all', label: 'All Types', icon: LayoutGrid },
               { id: 'image', label: 'Images', icon: ImageIcon },
@@ -418,13 +418,13 @@ export function MediaLibrary() {
                 key={t.id}
                 onClick={() => setSelectedType(t.id)}
                 className={cn(
-                  "w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer",
+                  "w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer",
                   selectedType === t.id
-                    ? "bg-brand-50 text-brand-700 shadow-xs"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "neu-button-primary text-white"
+                    : "text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)] hover:bg-black/5 dark:hover:bg-white/5"
                 )}
               >
-                <t.icon className={cn("w-4 h-4 shrink-0", selectedType === t.id ? "text-brand-600" : "text-gray-400")} />
+                <t.icon className={cn("w-4 h-4 shrink-0", selectedType === t.id ? "text-white" : "text-gray-400")} />
                 <span>{t.label}</span>
               </button>
             ))}
@@ -433,17 +433,17 @@ export function MediaLibrary() {
           {/* Tags Cloud */}
           {allTags.length > 0 && (
             <div className="space-y-2">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2.5">Tags</p>
+              <p className="text-[10px] font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider pl-2.5">Tags</p>
               <div className="flex flex-wrap gap-1.5 pl-2.5">
                 {allTags.map((tag) => (
                   <button
                     key={tag}
                     onClick={() => setSelectedTag(selectedTag === tag ? '' : tag)}
                     className={cn(
-                      "px-2 py-1 rounded-md text-[10px] font-bold transition-all cursor-pointer",
+                      "px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer",
                       selectedTag === tag
-                        ? "bg-brand-600 text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "neu-button-primary text-white"
+                        : "neu-inset text-[var(--neu-text-secondary)]"
                     )}
                   >
                     #{tag}
@@ -456,15 +456,15 @@ export function MediaLibrary() {
       </div>
 
       {/* ── MAIN CONTENT AREA ────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0 bg-white overflow-y-auto lg:overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 neu-card rounded-2xl overflow-y-auto lg:overflow-hidden">
         
         {/* Sub-header controls */}
-        <div className="p-4 border-b border-gray-200 flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 shrink-0 bg-white">
+        <div className="p-4 border-b border-black/5 dark:border-white/5 flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 shrink-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-900 tracking-tight capitalize">
+            <h2 className="text-xl font-bold text-[var(--neu-text-primary)] tracking-tight capitalize">
               {selectedFolder === 'all' ? 'All Assets' : selectedFolder}
             </h2>
-            <span className="bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded-full text-[10px]">
+            <span className="neu-inset text-blue-600 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
               {total} Assets
             </span>
           </div>
@@ -473,7 +473,7 @@ export function MediaLibrary() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 shadow-sm transition-all cursor-pointer font-bold"
+              className="neu-input px-3 py-2 text-xs font-bold"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -489,12 +489,12 @@ export function MediaLibrary() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search assets..."
-                className="pl-9 pr-4 py-2 w-full bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 shadow-sm transition-all"
+                className="neu-input pl-9 pr-4 py-2 w-full text-xs"
               />
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="fixed sm:static right-4 bottom-[calc(76px+env(safe-area-inset-bottom,0px))] z-30 flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold text-white bg-brand-600 rounded-full sm:rounded-xl hover:bg-brand-500 transition-all shadow-sm cursor-pointer shrink-0 min-h-[48px]"
+              className="neu-button-primary px-4 py-2 text-xs font-bold text-white rounded-xl flex items-center justify-center gap-2 cursor-pointer shrink-0"
             >
               <Upload className="w-3.5 h-3.5" />
               Upload Asset
@@ -661,8 +661,8 @@ export function MediaLibrary() {
                       resetTransformations();
                     }}
                     className={cn(
-                      "group relative aspect-square rounded-2xl overflow-hidden bg-white border shadow-sm transition-all duration-300 cursor-pointer flex flex-col justify-between",
-                      isSelected ? "border-brand-500 ring-2 ring-brand-500/20" : "border-gray-200 hover:border-gray-300 hover:shadow-md"
+                      "group relative aspect-square rounded-2xl overflow-hidden neu-card p-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between",
+                      isSelected ? "ring-2 ring-blue-500/60 shadow-md" : "hover:neu-card-hover"
                     )}
                   >
                     {/* Thumbnail render */}
@@ -762,7 +762,7 @@ export function MediaLibrary() {
             initial={{ x: 380, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 380, opacity: 0 }}
-            className="fixed inset-0 lg:relative lg:inset-auto w-full lg:w-96 border-l border-gray-200 bg-white flex flex-col shrink-0 z-40 lg:z-10"
+            className="fixed inset-0 lg:relative lg:inset-auto w-full lg:w-96 border-l border-black/5 dark:border-white/5 neu-card rounded-2xl flex flex-col shrink-0 z-40 lg:z-10"
           >
             <div className="p-4 border-b border-gray-150 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">

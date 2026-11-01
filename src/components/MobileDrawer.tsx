@@ -1,38 +1,42 @@
 import React, { useEffect, useCallback } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  LayoutDashboard, CalendarDays, PenSquare, BarChart3, Settings, Users,
-  Sparkles, FolderOpen, ChevronsUpDown, Inbox, CreditCard, LogOut, Check,
-  Image, Shield, X
+  LayoutDashboard,
+  FolderOpen,
+  Users,
+  Share2,
+  PenSquare,
+  CalendarDays,
+  Inbox,
+  Image,
+  Sparkles,
+  Compass,
+  CalendarCheck2,
+  Wand2,
+  Cpu,
+  GitBranch,
+  ShieldCheck,
+  Activity,
+  Brain,
+  Megaphone,
+  Target,
+  LineChart,
+  BarChart3,
+  FileText,
+  Lightbulb,
+  Settings,
+  Key,
+  Layers,
+  CreditCard,
+  LogOut,
+  X,
+  Shield,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Dropdown, DropdownItem, DropdownSeparator, DropdownLabel, Avatar } from './ui';
-import { useSwipeGesture } from '../hooks/useSwipeGesture';
-
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/app' },
-  { icon: FolderOpen, label: 'Projects', path: '/app/projects' },
-  { icon: CalendarDays, label: 'Calendar', path: '/app/calendar' },
-  { icon: PenSquare, label: 'Content Studio', path: '/app/studio' },
-  { icon: Image, label: 'Assets', path: '/app/assets' },
-  { icon: Inbox, label: 'Workflow', path: '/app/workflow' },
-  { icon: BarChart3, label: 'Analytics', path: '/app/analytics' },
-  { icon: BarChart3, label: 'Reports', path: '/app/reports' },
-];
-
-const workspaceItems = [
-  { icon: Sparkles, label: 'AI Assistant', path: '/app/ai' },
-  { icon: Users, label: 'Team', path: '/app/team' },
-  { icon: Users, label: 'Client CRM', path: '/app/clients' },
-];
-
-const bottomNavItems = [
-  { icon: CreditCard, label: 'Billing', path: '/app/billing' },
-  { icon: Settings, label: 'Settings', path: '/app/settings' },
-];
+import { Avatar } from './ui';
 
 interface MobileDrawerProps {
   open: boolean;
@@ -40,10 +44,10 @@ interface MobileDrawerProps {
 }
 
 export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
-  const { organizations, currentOrg, currentProject, setCurrentOrg, setCurrentProject } = useWorkspace();
+  const { currentOrg, currentProject } = useWorkspace();
   const { user, logout } = useAuth();
+  const location = useLocation();
 
-  // Close on escape
   const handleEscape = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') onClose();
   }, [onClose]);
@@ -59,191 +63,162 @@ export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
     };
   }, [open, handleEscape]);
 
-  // Swipe right to close
-  const swipeHandlers = useSwipeGesture({
-    onSwipe: (dir) => { if (dir === 'left') onClose(); },
-    directions: ['left'],
-    threshold: 60,
-  });
+  useEffect(() => {
+    onClose();
+  }, [location.pathname, onClose]);
+
+  const navGroups = [
+    {
+      label: 'Workspace',
+      items: [
+        { icon: LayoutDashboard, label: 'Overview', path: '/app' },
+        { icon: FolderOpen, label: 'Projects', path: '/app/projects' },
+        { icon: Users, label: 'Clients', path: '/app/clients' },
+        { icon: Share2, label: 'Social Accounts', path: '/app/accounts' },
+      ],
+    },
+    {
+      label: 'Publishing',
+      items: [
+        { icon: PenSquare, label: 'Content Studio', path: '/app/studio' },
+        { icon: CalendarDays, label: 'Content Calendar', path: '/app/calendar' },
+        { icon: Inbox, label: 'Review Pipeline', path: '/app/workflow' },
+        { icon: Image, label: 'Media Library', path: '/app/media' },
+      ],
+    },
+    {
+      label: 'Autonomous AI',
+      isAi: true,
+      items: [
+        { icon: Sparkles, label: 'AI Command Center', path: '/app/ai' },
+        { icon: Compass, label: 'AI Strategy', path: '/app/ai/strategy' },
+        { icon: CalendarCheck2, label: 'Content Planner', path: '/app/ai/content-planner' },
+        { icon: Wand2, label: 'Creative Studio', path: '/app/ai/creative-studio' },
+        { icon: Cpu, label: 'Autonomy Controls', path: '/app/ai/automation' },
+        { icon: GitBranch, label: 'Workflow Builder', path: '/app/ai/automation/workflows' },
+        { icon: ShieldCheck, label: 'Approval Center', path: '/app/ai/approvals' },
+        { icon: Activity, label: 'AI Activity Logs', path: '/app/ai/activity' },
+        { icon: Brain, label: 'Business Memory', path: '/app/ai/business-memory' },
+      ],
+    },
+    {
+      label: 'Advertising',
+      items: [
+        { icon: Megaphone, label: 'Ads Command Center', path: '/app/ads' },
+        { icon: Target, label: 'Campaigns', path: '/app/ads/campaigns' },
+        { icon: LineChart, label: 'Ad Analytics', path: '/app/ads/analytics' },
+      ],
+    },
+    {
+      label: 'Analytics',
+      items: [
+        { icon: BarChart3, label: 'Performance', path: '/app/analytics' },
+        { icon: FileText, label: 'Reports', path: '/app/reports' },
+        { icon: Lightbulb, label: 'Recommendations', path: '/app/recommendations' },
+      ],
+    },
+    {
+      label: 'Settings',
+      items: [
+        { icon: Settings, label: 'Workspace Settings', path: '/app/settings' },
+        { icon: Key, label: 'AI Provider Settings', path: '/app/settings/ai' },
+        { icon: Layers, label: 'Integrations', path: '/app/connections' },
+        { icon: CreditCard, label: 'Billing and Usage', path: '/app/billing' },
+        { icon: Users, label: 'Permissions & Team', path: '/app/team' },
+      ],
+    },
+  ];
 
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 lg:hidden" {...swipeHandlers}>
+        <div className="fixed inset-0 z-50 lg:hidden flex">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
             onClick={onClose}
           />
 
           {/* Drawer panel */}
-          <motion.div
+          <motion.aside
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="absolute left-0 top-0 h-full w-72 max-w-[85vw] bg-white shadow-modal flex flex-col"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Navigation drawer"
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="relative neu-card rounded-r-3xl w-72 max-w-[85vw] h-full flex flex-col z-10 overflow-hidden bg-[var(--neu-surface)] text-[var(--neu-text-primary)]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center shadow-sm">
-                  <Sparkles className="w-4 h-4 text-white" />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="font-bold text-gray-900 text-sm leading-tight truncate">
-                    {currentProject?.name || currentOrg?.name || 'SCHEDIT Inc.'}
-                  </span>
-                  <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider truncate">
-                    {currentProject ? (currentOrg?.name || 'SCHEDIT Inc.') : `${currentOrg?.subscriptionPlan || 'Free'} Plan`}
-                  </span>
+            <div className="p-4 border-b border-[var(--neu-border-inset)]/60 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Avatar src={user?.avatarUrl} name={user?.name || 'Khushal'} size="sm" />
+                <div className="min-w-0">
+                  <h3 className="font-extrabold text-xs text-[var(--neu-text-primary)] truncate">{user?.name || 'Khushal'}</h3>
+                  <p className="text-[10px] text-[var(--neu-text-muted)] truncate">{currentProject?.name || 'SchedIt OS'}</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors touch-target"
-                aria-label="Close navigation"
+                className="p-2 neu-button rounded-xl text-[var(--neu-text-muted)] hover:text-[var(--neu-text-primary)] transition-all touch-target"
+                aria-label="Close menu"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Navigation */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-3">
-              <nav className="px-3 space-y-1 mb-4">
-                <div className="px-2.5 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider h-5 flex items-end">
-                  Overview
-                </div>
-                {navItems.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    end={item.path === '/app'}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all touch-target",
-                        isActive
-                          ? "bg-brand-50 text-brand-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <item.icon className={cn("w-5 h-5 shrink-0 transition-colors", isActive ? "text-brand-600" : "text-gray-500")} />
-                        <span>{item.label}</span>
-                      </>
-                    )}
-                  </NavLink>
-                ))}
-              </nav>
+            {/* Navigation links */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-4">
+              {navGroups.map((group) => (
+                <div key={group.label} className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-[var(--neu-text-muted)] px-3 py-1">
+                    {group.label}
+                  </p>
+                  {group.items.map((item) => {
+                    const isExact = item.path === '/app';
+                    const isActive = isExact
+                      ? location.pathname === '/app'
+                      : location.pathname.startsWith(item.path);
+                    const Icon = item.icon;
 
-              <nav className="px-3 space-y-1 mb-4">
-                <div className="px-2.5 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider h-5 flex items-end">
-                  Workspace
+                    return (
+                      <NavLink
+                        key={item.path}
+                        to={item.path}
+                        end={isExact}
+                        onClick={onClose}
+                        className={cn(
+                          'flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all',
+                          isActive
+                            ? 'neu-button-inset text-blue-500'
+                            : 'text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)] hover:neu-raised-sm',
+                        )}
+                      >
+                        <Icon className={cn('w-4 h-4', isActive ? 'text-blue-500' : 'text-[var(--neu-text-muted)]')} />
+                        <span className="truncate">{item.label}</span>
+                      </NavLink>
+                    );
+                  })}
                 </div>
-                {workspaceItems.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all touch-target",
-                        isActive
-                          ? "bg-brand-50 text-brand-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <item.icon className={cn("w-5 h-5 shrink-0 transition-colors", isActive ? "text-brand-600" : "text-gray-500")} />
-                        <span>{item.label}</span>
-                      </>
-                    )}
-                  </NavLink>
-                ))}
-              </nav>
-
-              <nav className="px-3 space-y-1">
-                <div className="border-t border-gray-100 my-2" />
-                {(user?.isPlatformOwner || user?.isPlatformAdmin || user?.email?.toLowerCase() === 'khushalprasad242@gmail.com') && (
-                  <NavLink
-                    to="/app/admin"
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all touch-target",
-                        isActive
-                          ? "bg-purple-100 text-purple-800"
-                          : "text-purple-700 hover:bg-purple-50"
-                      )
-                    }
-                  >
-                    <Shield className="w-5 h-5 shrink-0 text-purple-600" />
-                    <span className="font-bold">Platform Admin</span>
-                  </NavLink>
-                )}
-                {bottomNavItems.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all touch-target",
-                        isActive
-                          ? "bg-brand-50 text-brand-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <item.icon className={cn("w-5 h-5 shrink-0 transition-colors", isActive ? "text-brand-600" : "text-gray-500")} />
-                        <span>{item.label}</span>
-                      </>
-                    )}
-                  </NavLink>
-                ))}
-              </nav>
+              ))}
             </div>
 
-            {/* User profile */}
-            <div className="p-3 border-t border-gray-200">
-              <div className="flex items-center gap-3 p-2">
-                <Avatar
-                  src={user?.avatarUrl}
-                  name={user?.name || 'Alex Carter'}
-                  size="sm"
-                />
-                <div className="flex flex-col text-left min-w-0 flex-1">
-                  <span className="text-sm font-bold text-gray-800 truncate leading-tight">
-                    {user?.name || 'Alex Carter'}
-                  </span>
-                  <span className="text-xs text-gray-500 truncate mt-0.5">
-                    {user?.email || 'alex@schedit.com'}
-                  </span>
-                </div>
-              </div>
+            {/* Footer */}
+            <div className="p-3 border-t border-[var(--neu-border-inset)]/60 shrink-0">
               <button
-                onClick={() => { logout(); onClose(); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 mt-2 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors touch-target"
+                onClick={() => {
+                  logout();
+                  onClose();
+                }}
+                className="flex items-center gap-2.5 w-full p-2.5 rounded-2xl text-xs font-bold text-rose-500 hover:neu-raised-sm transition-all"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
               </button>
             </div>
-          </motion.div>
+          </motion.aside>
         </div>
       )}
     </AnimatePresence>

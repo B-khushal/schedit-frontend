@@ -12,28 +12,34 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, breadcrumbs, actions, className }: PageHeaderProps) {
   return (
-    <div className={cn('flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 flex-wrap', className)}>
+    <div className={cn('flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-wrap', className)}>
       <div className="min-w-0 flex-1 w-full sm:w-auto">
         {breadcrumbs && breadcrumbs.length > 0 && (
-          <nav className="flex items-center gap-1 text-sm text-gray-500 mb-2 overflow-x-auto scrollbar-hide">
+          <nav className="flex items-center gap-1.5 text-xs text-[var(--neu-text-muted)] mb-1.5 overflow-x-auto scrollbar-hide font-semibold">
             {breadcrumbs.map((crumb, i) => (
               <React.Fragment key={i}>
-                {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />}
+                {i > 0 && <ChevronRight className="w-3.5 h-3.5 opacity-50 shrink-0" />}
                 {crumb.href ? (
-                  <a href={crumb.href} className="hover:text-gray-700 transition-colors font-medium truncate whitespace-nowrap">
+                  <a href={crumb.href} className="hover:text-blue-500 transition-colors truncate whitespace-nowrap">
                     {crumb.label}
                   </a>
                 ) : (
-                  <span className="text-gray-900 font-medium truncate">{crumb.label}</span>
+                  <span className="text-[var(--neu-text-primary)] truncate">{crumb.label}</span>
                 )}
               </React.Fragment>
             ))}
           </nav>
         )}
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 font-display tracking-tight">{title}</h1>
-        {description && <p className="text-xs sm:text-sm text-gray-500 mt-1">{description}</p>}
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--neu-text-primary)] font-display tracking-tight">
+          {title}
+        </h1>
+        {description && (
+          <p className="text-xs sm:text-sm text-[var(--neu-text-secondary)] mt-1 max-w-2xl leading-relaxed">
+            {description}
+          </p>
+        )}
       </div>
-      {actions && <div className="flex items-center gap-2 shrink-0 flex-wrap w-full sm:w-auto">{actions}</div>}
+      {actions && <div className="flex items-center gap-2.5 shrink-0 flex-wrap w-full sm:w-auto">{actions}</div>}
     </div>
   );
 }

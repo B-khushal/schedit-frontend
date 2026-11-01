@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-route
 import { AnimatePresence } from 'motion/react';
 import { AuthProvider } from './contexts/AuthContext';
 import { WorkspaceProvider } from './contexts/WorkspaceContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -189,6 +190,24 @@ function AnimatedRoutes() {
             <Route path="media" element={<Suspense fallback={<PageLoader />}><MediaLibrary /></Suspense>} />
             <Route path="assets" element={<Suspense fallback={<PageLoader />}><MediaLibrary /></Suspense>} />
             <Route path="ai" element={<Suspense fallback={<PageLoader />}><AIAssistant /></Suspense>} />
+            <Route path="ai/command-center" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="overview" /></Suspense>} />
+            <Route path="ai/strategy" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="strategy" /></Suspense>} />
+            <Route path="ai/content-planner" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="planner" /></Suspense>} />
+            <Route path="ai/creative-studio" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="creative" /></Suspense>} />
+            <Route path="ai/automation" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="automation" /></Suspense>} />
+            <Route path="ai/automation/workflows" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="workflows" /></Suspense>} />
+            <Route path="ai/approvals" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="approvals" /></Suspense>} />
+            <Route path="ai/activity" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="activity" /></Suspense>} />
+            <Route path="ai/business-memory" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="memory" /></Suspense>} />
+            <Route path="ads" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="ads" /></Suspense>} />
+            <Route path="ads/command-center" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="ads" /></Suspense>} />
+            <Route path="ads/campaigns" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="ads" /></Suspense>} />
+            <Route path="ads/audiences" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="ads" /></Suspense>} />
+            <Route path="ads/analytics" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="ads" /></Suspense>} />
+            <Route path="recommendations" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="overview" /></Suspense>} />
+            <Route path="settings/ai" element={<Suspense fallback={<PageLoader />}><AIAssistant initialTab="settings" /></Suspense>} />
+            <Route path="accounts" element={<Suspense fallback={<PageLoader />}><ConnectedApps /></Suspense>} />
+            <Route path="connections" element={<Suspense fallback={<PageLoader />}><APIConnections /></Suspense>} />
             <Route path="team" element={<Suspense fallback={<PageLoader />}><Team /></Suspense>} />
             <Route path="billing" element={<Suspense fallback={<PageLoader />}><Billing /></Suspense>} />
             <Route path="settings" element={<Suspense fallback={<PageLoader />}><Settings /></Suspense>} />
@@ -212,15 +231,17 @@ export default function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
-          <ClientAuthProvider>
-            <WorkspaceProvider>
-              <SubscriptionProvider>
-                <ToastProvider>
-                  <AnimatedRoutes />
-                </ToastProvider>
-              </SubscriptionProvider>
-            </WorkspaceProvider>
-          </ClientAuthProvider>
+          <ThemeProvider>
+            <ClientAuthProvider>
+              <WorkspaceProvider>
+                <SubscriptionProvider>
+                  <ToastProvider>
+                    <AnimatedRoutes />
+                  </ToastProvider>
+                </SubscriptionProvider>
+              </WorkspaceProvider>
+            </ClientAuthProvider>
+          </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>

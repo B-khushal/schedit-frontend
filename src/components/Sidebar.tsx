@@ -1,46 +1,87 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, PenSquare, BarChart3, Settings, Users, Sparkles, FolderOpen, ChevronsUpDown, ChevronLeft, ChevronRight, Inbox, CreditCard, LogOut, Check, Image, Shield } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  FolderOpen,
+  Users,
+  Share2,
+  PenSquare,
+  CalendarDays,
+  Inbox,
+  Image,
+  Sparkles,
+  Compass,
+  CalendarCheck2,
+  Wand2,
+  Cpu,
+  GitBranch,
+  ShieldCheck,
+  Activity,
+  Brain,
+  Megaphone,
+  Target,
+  LineChart,
+  BarChart3,
+  FileText,
+  Lightbulb,
+  Settings,
+  Key,
+  Layers,
+  CreditCard,
+  LogOut,
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
+  ChevronsUpDown,
+  Check,
+  Shield,
+  Circle,
+  AlertCircle,
+} from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Dropdown, DropdownItem, DropdownSeparator, DropdownLabel, Avatar } from './ui';
 import { useResponsive } from '../hooks/useMediaQuery';
+import { apiRequest } from '../lib/api';
 
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/app' },
-  { icon: FolderOpen, label: 'Projects', path: '/app/projects' },
-  { icon: CalendarDays, label: 'Calendar', path: '/app/calendar' },
-  { icon: PenSquare, label: 'Content Studio', path: '/app/studio' },
-  { icon: Image, label: 'Assets', path: '/app/assets' },
-  { icon: Inbox, label: 'Workflow', path: '/app/workflow' },
-  { icon: BarChart3, label: 'Analytics', path: '/app/analytics' },
-  { icon: BarChart3, label: 'Reports', path: '/app/reports' },
-];
-
-const workspaceItems = [
-  { icon: Sparkles, label: 'AI Assistant', path: '/app/ai' },
-  { icon: Users, label: 'Team', path: '/app/team' },
-  { icon: Users, label: 'Client CRM', path: '/app/clients' },
-];
-
-const bottomNavItems = [
-  { icon: CreditCard, label: 'Billing', path: '/app/billing' },
-  { icon: Settings, label: 'Settings', path: '/app/settings' },
-];
+interface NavSection {
+  id: string;
+  label: string;
+  isAi?: boolean;
+  items: {
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    path: string;
+    badge?: string | number;
+    badgeVariant?: 'brand' | 'amber' | 'neutral';
+  }[];
+}
 
 export function Sidebar() {
   const { organizations, currentOrg, currentProject, setCurrentOrg, setCurrentProject } = useWorkspace();
   const { user, logout } = useAuth();
   const { isTablet, isDesktop } = useResponsive();
-  
+  const location = useLocation();
+
   const [isCollapsed, setIsCollapsed] = useState(() => {
     const saved = localStorage.getItem('schedit_sidebar_collapsed');
     return saved === 'true';
   });
 
-  // Auto-collapse on tablet
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('schedit_sidebar_groups');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState<number>(0);
+  const [aiStatus, setAiStatus] = useState<{ mode: string; emergencyStop: boolean } | null>(null);
+
   useEffect(() => {
     if (isTablet) {
       setIsCollapsed(true);
@@ -53,253 +94,381 @@ export function Sidebar() {
     }
   }, [isCollapsed, isDesktop]);
 
+  const toggleSection = (sectionId: string) => {
+    setCollapsedSections((prev) => {
+      const next = { ...prev, [sectionId]: !prev[sectionId] };
+      localStorage.setItem('schedit_sidebar_groups', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!currentProject?.id) return;
+    let isMounted = true;
+
+    const fetchNavStatus = async () => {
+      try {
+        const [dashData, apprvData] = await Promise.allSettled([
+          apiRequest(`/api/v1/projects/${currentProject.id}/ai/dashboard`),
+          apiRequest(`/api/v1/projects/${currentProject.id}/ai/approvals`),
+        ]);
+
+        if (isMounted) {
+          if (dashData.status === 'fulfilled' && dashData.value?.operationalStatus) {
+            setAiStatus({
+              mode: dashData.value.operationalStatus.mode,
+              emergencyStop: dashData.value.operationalStatus.emergencyStop,
+            });
+          }
+          if (apprvData.status === 'fulfilled' && Array.isArray(apprvData.value)) {
+            setPendingApprovalsCount(apprvData.value.length);
+          }
+        }
+      } catch (err) {
+        // Silently handle fallback
+      }
+    };
+
+    fetchNavStatus();
+    const interval = setInterval(fetchNavStatus, 20000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [currentProject?.id]);
+
+  const navSections: NavSection[] = [
+    {
+      id: 'workspace',
+      label: 'Workspace',
+      items: [
+        { icon: LayoutDashboard, label: 'Overview', path: '/app' },
+        { icon: FolderOpen, label: 'Projects', path: '/app/projects' },
+        { icon: Users, label: 'Clients', path: '/app/clients' },
+        { icon: Share2, label: 'Social Accounts', path: '/app/accounts' },
+      ],
+    },
+    {
+      id: 'publishing',
+      label: 'Publishing',
+      items: [
+        { icon: PenSquare, label: 'Content Studio', path: '/app/studio' },
+        { icon: CalendarDays, label: 'Content Calendar', path: '/app/calendar' },
+        { icon: Inbox, label: 'Review Pipeline', path: '/app/workflow' },
+        { icon: Image, label: 'Media Library', path: '/app/media' },
+      ],
+    },
+    {
+      id: 'autonomous_ai',
+      label: 'Autonomous AI',
+      isAi: true,
+      items: [
+        { icon: Sparkles, label: 'AI Command Center', path: '/app/ai' },
+        { icon: Compass, label: 'AI Strategy', path: '/app/ai/strategy' },
+        { icon: CalendarCheck2, label: 'Content Planner', path: '/app/ai/content-planner' },
+        { icon: Wand2, label: 'Creative Studio', path: '/app/ai/creative-studio' },
+        { icon: Cpu, label: 'Autonomy Controls', path: '/app/ai/automation' },
+        { icon: GitBranch, label: 'Workflow Builder', path: '/app/ai/automation/workflows' },
+        {
+          icon: ShieldCheck,
+          label: 'Approval Center',
+          path: '/app/ai/approvals',
+          badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : undefined,
+          badgeVariant: 'amber',
+        },
+        { icon: Activity, label: 'AI Activity Logs', path: '/app/ai/activity' },
+        { icon: Brain, label: 'Business Memory', path: '/app/ai/business-memory' },
+      ],
+    },
+    {
+      id: 'advertising',
+      label: 'Advertising',
+      items: [
+        { icon: Megaphone, label: 'Ads Command Center', path: '/app/ads' },
+        { icon: Target, label: 'Campaigns', path: '/app/ads/campaigns' },
+        { icon: LineChart, label: 'Ad Analytics', path: '/app/ads/analytics' },
+      ],
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics',
+      items: [
+        { icon: BarChart3, label: 'Performance', path: '/app/analytics' },
+        { icon: FileText, label: 'Reports', path: '/app/reports' },
+        { icon: Lightbulb, label: 'Recommendations', path: '/app/recommendations' },
+      ],
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      items: [
+        { icon: Settings, label: 'Workspace Settings', path: '/app/settings' },
+        { icon: Key, label: 'AI Provider Settings', path: '/app/settings/ai' },
+        { icon: Layers, label: 'Integrations', path: '/app/connections' },
+        { icon: CreditCard, label: 'Billing and Usage', path: '/app/billing' },
+        { icon: Users, label: 'Permissions & Team', path: '/app/team' },
+      ],
+    },
+  ];
+
   return (
-    <motion.aside 
+    <motion.aside
       initial={false}
-      animate={{ width: isCollapsed ? 68 : 240 }}
-      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="border-r border-gray-200 bg-white flex flex-col h-full shrink-0 relative z-20 group hidden lg:flex"
+      animate={{ width: isCollapsed ? 80 : 270 }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      className="neu-card border-r-0 rounded-none sm:rounded-r-3xl bg-[var(--neu-surface)] flex flex-col h-full shrink-0 relative z-20 group hidden lg:flex select-none my-0"
       role="navigation"
       aria-label="Main navigation"
     >
-      {/* Toggle button — only show on desktop */}
+      {/* Desktop collapse toggle */}
       {isDesktop && !isTablet && (
-        <button 
+        <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3.5 top-6 bg-white border border-gray-200 shadow-sm p-1 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-50 z-30 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute -right-3.5 top-8 neu-button rounded-full p-1.5 text-[var(--neu-text-secondary)] hover:text-blue-500 z-30 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow-md"
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
         </button>
       )}
 
-      {/* Workspace Switcher */}
-      <div className="p-3">
-        <Dropdown
-          align="left"
-          trigger={
-            <div className={cn(
-              "flex items-center w-full p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-gray-200", 
-              isCollapsed ? "justify-center" : "justify-between"
-            )}>
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center shadow-sm shrink-0">
-                  <Sparkles className="w-4 h-4 text-white" />
-                </div>
-                {!isCollapsed && (
-                  <div className="flex flex-col overflow-hidden text-left min-w-0">
-                    <span className="font-bold text-gray-900 text-sm leading-tight truncate">
-                      {currentProject?.name || currentOrg?.name || 'SCHEDIT Inc.'}
-                    </span>
-                    <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider truncate">
-                      {currentProject ? (currentOrg?.name || 'SCHEDIT Inc.') : `${currentOrg?.subscriptionPlan || 'Free'} Plan`}
-                    </span>
-                  </div>
-                )}
-              </div>
-              {!isCollapsed && <ChevronsUpDown className="w-4 h-4 text-gray-400 shrink-0 ml-2" />}
+      {/* Top Profile / SchedIt Branding inspired by reference image */}
+      <div className="p-4 flex flex-col items-center border-b border-[var(--neu-border-inset)]/50 shrink-0">
+        {!isCollapsed ? (
+          <div className="flex flex-col items-center w-full">
+            {/* Soft circular user avatar frame inspired by reference image */}
+            <div className="p-1 neu-inset rounded-full mb-2.5">
+              <Avatar
+                src={user?.avatarUrl}
+                name={user?.name || 'Khushal'}
+                size="lg"
+                className="w-16 h-16"
+              />
             </div>
-          }
-          className="w-56 ml-2"
-        >
-          <DropdownLabel>Organizations</DropdownLabel>
-          {organizations.map((org) => (
-            <DropdownItem
-              key={org.id}
-              onClick={() => setCurrentOrg(org)}
-              className="justify-between"
-            >
-              <span>{org.name}</span>
-              {currentOrg?.id === org.id && <Check className="w-4 h-4 text-brand-600" />}
-            </DropdownItem>
-          ))}
-          
-          {currentOrg && currentOrg.projects && currentOrg.projects.length > 0 && (
-            <>
-              <DropdownSeparator />
-              <DropdownLabel>Projects</DropdownLabel>
-              {currentOrg.projects.map((proj) => (
-                <DropdownItem
-                  key={proj.id}
-                  onClick={() => setCurrentProject(proj)}
-                  className="justify-between"
-                >
-                  <span className="truncate">{proj.name}</span>
-                  {currentProject?.id === proj.id && <Check className="w-4 h-4 text-brand-600" />}
-                </DropdownItem>
-              ))}
-            </>
-          )}
-        </Dropdown>
-      </div>
-      
-      {/* Navigation list */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-2">
-        <nav className="px-3 space-y-1 mb-6">
-          {!isCollapsed && (
-            <div className="px-2.5 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider h-5 flex items-end">
-              Overview
-            </div>
-          )}
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/app'}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center rounded-xl text-sm font-semibold transition-all group/nav relative",
-                  isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
-                  isActive 
-                    ? "bg-brand-50 text-brand-700" 
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <item.icon className={cn("w-5 h-5 shrink-0 transition-colors", isActive ? "text-brand-600" : "text-gray-500 group-hover/nav:text-gray-700")} />
-                  {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-3 px-2 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all whitespace-nowrap z-50 pointer-events-none shadow-md">
-                      {item.label}
-                    </div>
-                  )}
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
+            <h2 className="text-sm font-extrabold text-[var(--neu-text-primary)] font-display tracking-tight text-center truncate max-w-[200px]">
+              {user?.name || 'Khushal'}
+            </h2>
+            <p className="text-[11px] font-semibold text-[var(--neu-text-muted)] text-center truncate max-w-[200px]">
+              {currentProject?.name || 'SchedIt Marketing OS'}
+            </p>
+          </div>
+        ) : (
+          <div className="p-1 neu-inset rounded-full">
+            <Avatar
+              src={user?.avatarUrl}
+              name={user?.name || 'Khushal'}
+              size="sm"
+              className="w-9 h-9"
+            />
+          </div>
+        )}
 
-        <nav className="px-3 space-y-1">
-          {!isCollapsed && (
-            <div className="px-2.5 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider h-5 flex items-end">
-              Workspace
-            </div>
-          )}
-          {workspaceItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center rounded-xl text-sm font-semibold transition-all group/nav relative",
-                  isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
-                  isActive 
-                    ? "bg-brand-50 text-brand-700" 
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <item.icon className={cn("w-5 h-5 shrink-0 transition-colors", isActive ? "text-brand-600" : "text-gray-500 group-hover/nav:text-gray-700")} />
-                  {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-3 px-2 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all whitespace-nowrap z-50 pointer-events-none shadow-md">
-                      {item.label}
-                    </div>
-                  )}
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-      </div>
-
-      {/* Bottom Nav / Settings / Profile */}
-      <div className="p-3 border-t border-gray-200">
-        <div className="space-y-1">
-          {(user?.isPlatformOwner || user?.isPlatformAdmin || user?.email?.toLowerCase() === 'khushalprasad242@gmail.com') && (
-            <NavLink
-              to="/app/admin"
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center rounded-xl text-sm font-semibold transition-all group/nav relative",
-                  isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
-                  isActive 
-                    ? "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300" 
-                    : "text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40"
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Shield className={cn("w-5 h-5 shrink-0 transition-colors", isActive ? "text-purple-700" : "text-purple-600")} />
-                  {!isCollapsed && <span className="whitespace-nowrap font-bold">Platform Admin</span>}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-3 px-2 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all whitespace-nowrap z-50 pointer-events-none shadow-md">
-                      Platform Admin
-                    </div>
-                  )}
-                </>
-              )}
-            </NavLink>
-          )}
-
-          {bottomNavItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center rounded-xl text-sm font-semibold transition-all group/nav relative",
-                  isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
-                  isActive 
-                    ? "bg-brand-50 text-brand-700" 
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <item.icon className={cn("w-5 h-5 shrink-0 transition-colors", isActive ? "text-brand-600" : "text-gray-500 group-hover/nav:text-gray-700")} />
-                  {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-3 px-2 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all whitespace-nowrap z-50 pointer-events-none shadow-md">
-                      {item.label}
-                    </div>
-                  )}
-                </>
-              )}
-            </NavLink>
-          ))}
-        </div>
-        
-        {/* User profile dropdown triggers logout */}
-        <div className="mt-4 pt-4 border-t border-gray-100">
+        {/* Workspace Switcher dropdown */}
+        <div className="w-full mt-3">
           <Dropdown
             align="left"
             trigger={
-              <div className={cn(
-                "flex items-center p-1.5 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer", 
-                isCollapsed ? "justify-center" : "gap-3"
-              )}>
-                <Avatar
-                  src={user?.avatarUrl}
-                  name={user?.name || 'Alex Carter'}
-                  size="sm"
-                />
-                {!isCollapsed && (
-                  <div className="flex flex-col text-left min-w-0">
-                    <span className="text-sm font-bold text-gray-800 truncate leading-tight">
-                      {user?.name || 'Alex Carter'}
-                    </span>
-                    <span className="text-xs text-gray-500 truncate mt-0.5">
-                      {user?.email || 'alex@schedit.com'}
-                    </span>
-                  </div>
+              <div
+                className={cn(
+                  'flex items-center w-full p-2 neu-button rounded-xl cursor-pointer transition-all',
+                  isCollapsed ? 'justify-center' : 'justify-between',
                 )}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-6 h-6 rounded-lg bg-blue-500 flex items-center justify-center text-white font-black text-[10px] shrink-0 shadow-xs">
+                    {currentProject?.name?.charAt(0) || currentOrg?.name?.charAt(0) || 'S'}
+                  </div>
+                  {!isCollapsed && (
+                    <div className="flex flex-col overflow-hidden text-left min-w-0">
+                      <span className="font-bold text-[var(--neu-text-primary)] text-xs truncate">
+                        {currentProject?.name || currentOrg?.name || 'Workspace'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {!isCollapsed && <ChevronsUpDown className="w-3.5 h-3.5 text-[var(--neu-text-muted)] shrink-0 ml-1" />}
               </div>
             }
-            className="w-48 ml-2 bottom-full mb-2"
+            className="w-56 ml-2"
           >
-            <DropdownLabel>Account Menu</DropdownLabel>
-            <DropdownItem onClick={logout} destructive icon={<LogOut className="w-4 h-4" />}>
-              Sign Out
-            </DropdownItem>
+            <DropdownLabel>Organizations</DropdownLabel>
+            {organizations.map((org) => (
+              <DropdownItem key={org.id} onClick={() => setCurrentOrg(org)} className="justify-between text-xs">
+                <span className="truncate">{org.name}</span>
+                {currentOrg?.id === org.id && <Check className="w-3.5 h-3.5 text-blue-500" />}
+              </DropdownItem>
+            ))}
+
+            {currentOrg && currentOrg.projects && currentOrg.projects.length > 0 && (
+              <>
+                <DropdownSeparator />
+                <DropdownLabel>Projects</DropdownLabel>
+                {currentOrg.projects.map((proj) => (
+                  <DropdownItem
+                    key={proj.id}
+                    onClick={() => setCurrentProject(proj)}
+                    className="justify-between text-xs"
+                  >
+                    <span className="truncate">{proj.name}</span>
+                    {currentProject?.id === proj.id && <Check className="w-3.5 h-3.5 text-blue-500" />}
+                  </DropdownItem>
+                ))}
+              </>
+            )}
           </Dropdown>
         </div>
+
+        {/* AI Operational Status Pill */}
+        {!isCollapsed && (
+          <NavLink
+            to="/app/ai"
+            className={cn(
+              'mt-2.5 w-full px-3 py-1.5 neu-pill-inset flex items-center justify-between text-[11px] font-bold transition-all',
+              aiStatus?.emergencyStop ? 'text-rose-500' : 'text-emerald-500',
+            )}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span
+                className={cn(
+                  'w-2 h-2 rounded-full shrink-0 shadow-xs',
+                  aiStatus?.emergencyStop ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500 animate-pulse',
+                )}
+              />
+              <span className="truncate">
+                {aiStatus?.emergencyStop
+                  ? 'AI Paused (Stop Active)'
+                  : `AI: ${aiStatus?.mode?.replace('_', ' ') || 'Autonomous'}`}
+              </span>
+            </div>
+            <Sparkles className="w-3 h-3 shrink-0 opacity-80" />
+          </NavLink>
+        )}
+      </div>
+
+      {/* Navigation Sections with Inset Active States */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-3 px-3 space-y-4">
+        {navSections.map((section) => {
+          const isSectionCollapsed = !!collapsedSections[section.id];
+          return (
+            <div key={section.id} className="space-y-1">
+              {!isCollapsed && (
+                <button
+                  type="button"
+                  onClick={() => toggleSection(section.id)}
+                  className="w-full flex items-center justify-between px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[var(--neu-text-muted)] hover:text-[var(--neu-text-secondary)] transition-colors cursor-pointer"
+                >
+                  <span className={cn('flex items-center gap-1.5', section.isAi && 'text-blue-500 font-black')}>
+                    {section.isAi && <Sparkles className="w-3 h-3" />}
+                    {section.label}
+                  </span>
+                  {isSectionCollapsed ? (
+                    <ChevronRight className="w-3 h-3 opacity-60" />
+                  ) : (
+                    <ChevronDown className="w-3 h-3 opacity-60" />
+                  )}
+                </button>
+              )}
+
+              <AnimatePresence initial={false}>
+                {(!isSectionCollapsed || isCollapsed) && (
+                  <motion.div
+                    initial={false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="space-y-1"
+                  >
+                    {section.items.map((item) => {
+                      const Icon = item.icon;
+                      const isExact = item.path === '/app';
+                      const isActive = isExact
+                        ? location.pathname === '/app'
+                        : location.pathname.startsWith(item.path);
+
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          end={isExact}
+                          className={cn(
+                            'flex items-center rounded-2xl text-xs font-bold transition-all group/nav relative cursor-pointer select-none',
+                            isCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5',
+                            isActive
+                              ? 'neu-button-inset text-blue-500'
+                              : 'text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-primary)] hover:neu-raised-sm',
+                          )}
+                        >
+                          <Icon
+                            className={cn(
+                              'w-4 h-4 shrink-0 transition-colors',
+                              isActive ? 'text-blue-500' : 'text-[var(--neu-text-muted)] group-hover/nav:text-blue-500',
+                            )}
+                          />
+
+                          {!isCollapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
+
+                          {!isCollapsed && item.badge != null && (
+                            <span
+                              className={cn(
+                                'text-[10px] font-extrabold px-1.5 py-0.5 rounded-full leading-none shrink-0',
+                                item.badgeVariant === 'amber'
+                                  ? 'neu-inset-sm text-amber-500'
+                                  : 'neu-inset-sm text-blue-500',
+                              )}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+
+                          {isCollapsed && (
+                            <div className="absolute left-full ml-3 px-2.5 py-1.5 neu-raised text-[var(--neu-text-primary)] text-xs font-bold rounded-xl opacity-0 invisible group-hover/nav:opacity-100 group-hover/nav:visible transition-all whitespace-nowrap z-50 pointer-events-none shadow-lg flex items-center gap-1.5">
+                              <span>{item.label}</span>
+                              {item.badge != null && (
+                                <span className="neu-pill-inset text-amber-500 font-extrabold px-1.5 text-[9px]">
+                                  {item.badge}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer / Account & Sign Out */}
+      <div className="p-3 border-t border-[var(--neu-border-inset)]/50 shrink-0 space-y-1.5">
+        {(user?.isPlatformOwner || user?.isPlatformAdmin || user?.email?.toLowerCase() === 'khushalprasad242@gmail.com') && (
+          <NavLink
+            to="/app/admin"
+            className={cn(
+              'flex items-center rounded-2xl text-xs font-bold transition-all group/nav relative',
+              isCollapsed ? 'justify-center p-2.5' : 'gap-2.5 px-3 py-2',
+              location.pathname.startsWith('/app/admin')
+                ? 'neu-button-inset text-purple-600'
+                : 'text-purple-600 hover:neu-raised-sm',
+            )}
+          >
+            <Shield className="w-4 h-4 shrink-0 text-purple-600" />
+            {!isCollapsed && <span className="truncate">Platform Admin</span>}
+          </NavLink>
+        )}
+
+        <button
+          onClick={logout}
+          className={cn(
+            'flex items-center w-full rounded-2xl text-xs font-bold text-rose-500 hover:neu-raised-sm transition-all p-2.5 cursor-pointer',
+            isCollapsed ? 'justify-center' : 'gap-2.5 px-3',
+          )}
+          title="Sign Out"
+        >
+          <LogOut className="w-4 h-4 shrink-0" />
+          {!isCollapsed && <span>Sign Out</span>}
+        </button>
       </div>
     </motion.aside>
   );

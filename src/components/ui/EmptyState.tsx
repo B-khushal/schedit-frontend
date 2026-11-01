@@ -16,21 +16,21 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center text-center py-16 px-6', className)}>
+    <div className={cn('neu-card flex flex-col items-center justify-center text-center py-16 px-6 max-w-lg mx-auto my-8', className)}>
       {icon && (
-        <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-5 text-gray-400">
-          {icon}
+        <div className="w-16 h-16 neu-inset rounded-3xl flex items-center justify-center mb-5 text-blue-500 shadow-inner">
+          <span className="w-7 h-7 flex items-center justify-center">{icon}</span>
         </div>
       )}
-      <h3 className="text-base font-semibold text-gray-900 mb-1">{title}</h3>
-      {description && <p className="text-sm text-gray-500 max-w-sm leading-relaxed">{description}</p>}
+      <h3 className="text-base sm:text-lg font-bold text-[var(--neu-text-primary)] font-display tracking-tight mb-1.5">{title}</h3>
+      {description && <p className="text-xs sm:text-sm text-[var(--neu-text-secondary)] max-w-sm leading-relaxed">{description}</p>}
       {action && (
         <Button
           variant="primary"
           size="md"
           icon={action.icon}
           onClick={action.onClick}
-          className="mt-5"
+          className="mt-6"
         >
           {action.label}
         </Button>
