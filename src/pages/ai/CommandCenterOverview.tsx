@@ -277,8 +277,8 @@ export function CommandCenterOverview({
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         <KPICard
           title="Posts Published"
-          value={dashboard?.publishedCount != null ? dashboard.publishedCount : 24}
-          change="+18% vs last mo"
+          value={dashboard?.publishedCount != null ? dashboard.publishedCount : 0}
+          change={dashboard?.publishedCount ? "Verified live" : "No published posts yet"}
           changeType="positive"
         />
         <KPICard
@@ -301,13 +301,13 @@ export function CommandCenterOverview({
         />
         <KPICard
           title="Daily Ad Spend"
-          value={`$${budget.dailySpent || 0}`}
-          change={`Cap: $${budget.dailyCap || 50}/day`}
+          value={`₹${(budget.dailySpent || 0).toLocaleString('en-IN')}`}
+          change={`Cap: ₹${(budget.dailyCap || 4000).toLocaleString('en-IN')}/day`}
           changeType="neutral"
         />
         <KPICard
           title="AI Token Cost"
-          value={`$${usage.totalCostUsd || '0.00'}`}
+          value={`₹${((Number(usage.totalCostUsd) || 0) * 83).toFixed(2)}`}
           change={`${((usage.totalTokens || 0) / 1000).toFixed(1)}k tokens`}
           changeType="neutral"
         />

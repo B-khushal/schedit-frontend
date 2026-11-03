@@ -7,19 +7,27 @@ function normalizeUrl(url: string): string {
 }
 
 export const APP_URL = normalizeUrl(
-  import.meta.env.VITE_APP_URL ||
+  (typeof window !== 'undefined' && (window as any).__ENV__?.VITE_APP_URL) ||
+    import.meta.env.VITE_APP_URL ||
     import.meta.env.NEXT_PUBLIC_APP_URL ||
     browserOrigin ||
     defaultAppUrl,
 );
 
 export const API_URL = normalizeUrl(
-  import.meta.env.VITE_API_URL ||
+  (typeof window !== 'undefined' && (window as any).__ENV__?.VITE_API_URL) ||
+    import.meta.env.VITE_API_URL ||
     import.meta.env.NEXT_PUBLIC_API_URL ||
     defaultApiUrl,
 );
 
-export const API_ORIGIN = new URL(API_URL).origin;
+export const API_ORIGIN = (() => {
+  try {
+    return new URL(API_URL).origin;
+  } catch {
+    return browserOrigin || 'http://localhost:3001';
+  }
+})();
 
 export function toApiUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) {

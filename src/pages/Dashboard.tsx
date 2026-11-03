@@ -11,7 +11,7 @@ import {
   Star,
   CheckCircle,
   Eye,
-  DollarSign,
+  IndianRupee,
   Share2,
   Calendar as CalendarIcon,
   Megaphone,
@@ -130,20 +130,11 @@ export function Dashboard() {
   const chartData = analytics.length > 0
     ? analytics.map((stat: any) => ({
         name: format(new Date(stat.date), 'dd MMM'),
-        impressions: stat.impressions || Math.floor(Math.random() * 50) + 10,
-        reach: stat.reach || Math.floor(Math.random() * 40) + 5,
-        posts: stat.postsCount || Math.floor(Math.random() * 4) + 1,
+        impressions: stat.impressions || 0,
+        reach: stat.reach || 0,
+        posts: stat.postsCount || 0,
       })).slice(-7)
-    : [
-        { name: '10', impressions: 22, reach: 14, posts: 1 },
-        { name: '20', impressions: 45, reach: 28, posts: 3 },
-        { name: '30', impressions: 68, reach: 48, posts: 2 },
-        { name: '40', impressions: 32, reach: 22, posts: 1 },
-        { name: '50', impressions: 78, reach: 62, posts: 4 },
-        { name: '60', impressions: 52, reach: 38, posts: 2 },
-        { name: '70', impressions: 88, reach: 74, posts: 5 },
-        { name: '80', impressions: 28, reach: 18, posts: 1 },
-      ];
+    : [];
 
   const currentDateStr = format(new Date(), 'EEEE, MMMM d, yyyy');
 
@@ -159,7 +150,7 @@ export function Dashboard() {
             <span>{currentProject.name}</span>
           </div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[var(--neu-text-primary)] font-display tracking-tight">
-            Good day, {user?.name?.split(' ')[0] || 'Khushal'} 👋
+            Good day, {user?.name?.split(' ')[0] || 'User'} 👋
           </h1>
           <p className="text-xs sm:text-sm text-[var(--neu-text-secondary)] mt-1 max-w-xl leading-relaxed">
             Here's what's happening with your social media channels and autonomous marketing operations today.
@@ -195,52 +186,50 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* 2. Primary KPI Cards inspired by the reference image */}
-      {/* Reference image: "Incomes $3000 [330]", "Accounts 11529 [960]", "Views 83245 [3210]" */}
+      {/* 2. Primary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <KPICard
           label="Incomes / Reach Value"
-          value={`$${(Math.max(1250, (totalFollowers * 0.45))).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-          subValue="330"
-          trend="+14.2%"
-          trendUp={true}
-          icon={<DollarSign className="w-5 h-5 text-emerald-500" />}
+          value={totalFollowers > 0 ? `₹${(totalFollowers * 35).toLocaleString('en-IN')}` : '₹0'}
+          subValue={`${publishedPosts.length} Published`}
+          trend={publishedPosts.length > 0 ? `+${publishedPosts.length} posts` : '0 posts'}
+          trendUp={publishedPosts.length > 0}
+          icon={<IndianRupee className="w-5 h-5 text-emerald-500" />}
           iconBg="bg-emerald-500/10"
         />
 
         <KPICard
           label="Accounts / Followers"
-          value={totalFollowers > 0 ? totalFollowers.toLocaleString() : '11,529'}
-          subValue="960"
-          trend="+8.5%"
-          trendUp={true}
+          value={totalFollowers.toLocaleString('en-IN')}
+          subValue={`${currentProject.socialAccounts?.length || 0} Connected`}
+          trend={`${currentProject.socialAccounts?.length || 0} Accounts`}
+          trendUp={totalFollowers > 0}
           icon={<Users className="w-5 h-5 text-blue-500" />}
           iconBg="bg-blue-500/10"
         />
 
         <KPICard
           label="Views / Impressions"
-          value={analytics.length > 0 ? analytics.reduce((acc, a) => acc + (a.impressions || 0), 0).toLocaleString() : '83,245'}
-          subValue="3,210"
-          trend="+22.8%"
-          trendUp={true}
+          value={analytics.reduce((acc, a) => acc + (a.impressions || 0), 0).toLocaleString('en-IN')}
+          subValue={`${analytics.length} Records`}
+          trend={analytics.length > 0 ? 'Live Telemetry' : 'No records yet'}
+          trendUp={analytics.length > 0}
           icon={<Eye className="w-5 h-5 text-indigo-500" />}
           iconBg="bg-indigo-500/10"
         />
 
         <KPICard
           label="Scheduled Queue"
-          value={scheduledPosts.length + publishedPosts.length}
+          value={scheduledPosts.length}
           subValue="Active"
           trend={`${scheduledPosts.length} Upcoming`}
-          trendUp={true}
+          trendUp={scheduledPosts.length > 0}
           icon={<Clock className="w-5 h-5 text-cyan-500" />}
           iconBg="bg-cyan-500/10"
         />
       </div>
 
-      {/* 3. Analytics Charts Grid — Directly inspired by the reference image */}
-      {/* In the reference image: left is blue vertical bar chart, right is area/line chart, both inside soft recessed wells */}
+      {/* 3. Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
         {/* Left Chart: Posting Volume & Frequency Bar Chart */}
         <div className="neu-card p-5 sm:p-6 rounded-3xl flex flex-col justify-between">
@@ -260,44 +249,51 @@ export function Dashboard() {
           </div>
 
           {/* Recessed well for Bar Chart matching reference image */}
-          <div className="neu-well p-4 sm:p-5 rounded-2xl w-full h-[220px] sm:h-[260px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: 'var(--neu-text-muted)', fontSize: 11, fontWeight: 700 }}
-                  dy={8}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: 'var(--neu-text-muted)', fontSize: 11, fontWeight: 700 }}
-                />
-                <Tooltip
-                  cursor={{ fill: 'rgba(59, 130, 246, 0.08)' }}
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="neu-card p-2.5 rounded-xl text-xs font-bold shadow-lg border border-[var(--neu-border)]">
-                          <p className="text-[var(--neu-text-muted)] text-[10px] uppercase">{payload[0]?.payload?.name}</p>
-                          <p className="text-blue-500 mt-0.5">Reach: {payload[0]?.value}</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                {/* Soft vibrant blue bars with rounded top corners like reference image */}
-                <Bar
-                  dataKey="impressions"
-                  fill="#3B82F6"
-                  radius={[6, 6, 0, 0]}
-                  maxBarSize={32}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="neu-well p-4 sm:p-5 rounded-2xl w-full h-[220px] sm:h-[260px] flex items-center justify-center">
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: 'var(--neu-text-muted)', fontSize: 11, fontWeight: 700 }}
+                    dy={8}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: 'var(--neu-text-muted)', fontSize: 11, fontWeight: 700 }}
+                  />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(59, 130, 246, 0.08)' }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="neu-card p-2.5 rounded-xl text-xs font-bold shadow-lg border border-[var(--neu-border)]">
+                            <p className="text-[var(--neu-text-muted)] text-[10px] uppercase">{payload[0]?.payload?.name}</p>
+                            <p className="text-blue-500 mt-0.5">Reach: {payload[0]?.value}</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar
+                    dataKey="impressions"
+                    fill="#3B82F6"
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={32}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center p-6 space-y-2">
+                <BarChart3 className="w-8 h-8 text-slate-400 mx-auto opacity-50" />
+                <p className="text-xs font-bold text-[var(--neu-text-secondary)]">No Analytics Synced Yet</p>
+                <p className="text-[11px] text-[var(--neu-text-muted)]">Connect social channels or publish posts to view activity metrics.</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -314,63 +310,70 @@ export function Dashboard() {
               </p>
             </div>
             <div className="neu-pill-inset px-2.5 py-1 text-[11px] font-bold text-cyan-500">
-              Audited
+              Live
             </div>
           </div>
 
           {/* Recessed well for Area Chart matching reference image */}
-          <div className="neu-well p-4 sm:p-5 rounded-2xl w-full h-[220px] sm:h-[260px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="neuGrowthGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: 'var(--neu-text-muted)', fontSize: 11, fontWeight: 700 }}
-                  dy={8}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: 'var(--neu-text-muted)', fontSize: 11, fontWeight: 700 }}
-                />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="neu-card p-2.5 rounded-xl text-xs font-bold shadow-lg border border-[var(--neu-border)]">
-                          <p className="text-[var(--neu-text-muted)] text-[10px] uppercase">{payload[0]?.payload?.name}</p>
-                          <p className="text-cyan-500 mt-0.5">Views: {payload[0]?.value}</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="impressions"
-                  stroke="#38BDF8"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#neuGrowthGradient)"
-                  dot={{ r: 4, fill: '#38BDF8', stroke: 'var(--neu-surface)', strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: '#38BDF8' }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="neu-well p-4 sm:p-5 rounded-2xl w-full h-[220px] sm:h-[260px] flex items-center justify-center">
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="neuGrowthGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: 'var(--neu-text-muted)', fontSize: 11, fontWeight: 700 }}
+                    dy={8}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: 'var(--neu-text-muted)', fontSize: 11, fontWeight: 700 }}
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="neu-card p-2.5 rounded-xl text-xs font-bold shadow-lg border border-[var(--neu-border)]">
+                            <p className="text-[var(--neu-text-muted)] text-[10px] uppercase">{payload[0]?.payload?.name}</p>
+                            <p className="text-cyan-500 mt-0.5">Views: {payload[0]?.value}</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="impressions"
+                    stroke="#38BDF8"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#neuGrowthGradient)"
+                    dot={{ r: 4, fill: '#38BDF8', stroke: 'var(--neu-surface)', strokeWidth: 2 }}
+                    activeDot={{ r: 6, fill: '#38BDF8' }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center p-6 space-y-2">
+                <TrendingUp className="w-8 h-8 text-slate-400 mx-auto opacity-50" />
+                <p className="text-xs font-bold text-[var(--neu-text-secondary)]">No Growth Trajectory Yet</p>
+                <p className="text-[11px] text-[var(--neu-text-muted)]">Live audience trajectory appears once platform data syncs.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* 4. Bottom 4 Summary Metrics Strip — Directly inspired by the reference image */}
-      {/* Reference: "120 Organic", "960 Advertisements", "60% Add click Rate", "20.1% Rate" */}
+      {/* 4. Bottom 4 Summary Metrics Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="neu-card p-4 rounded-2xl flex items-center gap-3">
           <div className="neu-inset-sm p-2.5 rounded-xl text-blue-500 shrink-0">
@@ -378,7 +381,7 @@ export function Dashboard() {
           </div>
           <div className="min-w-0">
             <p className="text-lg sm:text-xl font-extrabold text-[var(--neu-text-primary)] font-display tracking-tight">
-              {publishedPosts.length > 0 ? publishedPosts.length : '120'}
+              {publishedPosts.length}
             </p>
             <p className="text-[11px] font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider truncate">
               Organic Posts
@@ -392,38 +395,38 @@ export function Dashboard() {
           </div>
           <div className="min-w-0">
             <p className="text-lg sm:text-xl font-extrabold text-[var(--neu-text-primary)] font-display tracking-tight">
-              960
+              {aiStatus?.activeCampaigns?.length || 0}
             </p>
             <p className="text-[11px] font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider truncate">
-              Advertisements
+              Active Campaigns
             </p>
           </div>
         </div>
 
         <div className="neu-card p-4 rounded-2xl flex items-center gap-3">
           <div className="neu-inset-sm p-2.5 rounded-xl text-emerald-500 shrink-0">
-            <MousePointer className="w-4 h-4" />
+            <Bot className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <p className="text-lg sm:text-xl font-extrabold text-[var(--neu-text-primary)] font-display tracking-tight">
-              60%
+              {aiStatus?.recentDecisions?.length || 0}
             </p>
             <p className="text-[11px] font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider truncate">
-              Ad Click Rate
+              AI Decisions Made
             </p>
           </div>
         </div>
 
         <div className="neu-card p-4 rounded-2xl flex items-center gap-3">
           <div className="neu-inset-sm p-2.5 rounded-xl text-amber-500 shrink-0">
-            <TrendingUp className="w-4 h-4" />
+            <Clock className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <p className="text-lg sm:text-xl font-extrabold text-[var(--neu-text-primary)] font-display tracking-tight">
-              20.1%
+              {pendingReviews.length || aiStatus?.pendingApprovals?.length || 0}
             </p>
             <p className="text-[11px] font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider truncate">
-              Conversion Rate
+              Pending Approvals
             </p>
           </div>
         </div>
@@ -439,13 +442,23 @@ export function Dashboard() {
                 <h2 className="text-base font-bold text-[var(--neu-text-primary)] font-display tracking-tight">
                   Autonomous Marketing Agent
                 </h2>
-                <span className="neu-pill-inset px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-500 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Active
+                <span className={cn(
+                  "neu-pill-inset px-2.5 py-0.5 text-[10px] font-extrabold flex items-center gap-1",
+                  aiStatus?.operationalStatus?.emergencyStop
+                    ? "text-rose-500"
+                    : "text-emerald-500"
+                )}>
+                  <span className={cn(
+                    "w-1.5 h-1.5 rounded-full",
+                    aiStatus?.operationalStatus?.emergencyStop
+                      ? "bg-rose-500"
+                      : "bg-emerald-500 animate-pulse"
+                  )} />
+                  {aiStatus?.operationalStatus?.emergencyStop ? 'Stopped' : 'Active'}
                 </span>
               </div>
               <p className="text-xs text-[var(--neu-text-secondary)] mt-0.5">
-                Current mode: {aiStatus?.operationalStatus?.mode || 'Autonomous'} • Next cycle: {aiStatus?.operationalStatus?.dailyExecutionTime || '09:00 AM'}
+                Current mode: {aiStatus?.operationalStatus?.autonomyMode || 'Autonomous'} • Next cycle: {aiStatus?.operationalStatus?.dailyExecutionTime || '09:00 AM'}
               </p>
             </div>
             <Button
@@ -459,36 +472,24 @@ export function Dashboard() {
           </div>
 
           {/* AI Activity Timeline items */}
-          <div className="neu-well p-4 rounded-2xl space-y-3">
-            <div className="flex items-start gap-3 text-xs">
-              <span className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
-                ✓
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-[var(--neu-text-primary)]">Analyzed Meta & Instagram engagement benchmarks</p>
-                <p className="text-[10px] text-[var(--neu-text-muted)]">Identified 34% higher retention on carousel formats with conversational captions.</p>
+          <div className="neu-well p-4 rounded-2xl space-y-3 min-h-[140px] flex flex-col justify-center">
+            {aiStatus?.recentDecisions && aiStatus.recentDecisions.length > 0 ? (
+              aiStatus.recentDecisions.slice(0, 3).map((dec: any) => (
+                <div key={dec.id} className="flex items-start gap-3 text-xs">
+                  <span className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                    ✓
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[var(--neu-text-primary)]">{dec.decision}</p>
+                    <p className="text-[10px] text-[var(--neu-text-muted)] line-clamp-1">{dec.reasoning || 'Automated agent reasoning'}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-6 text-xs text-[var(--neu-text-muted)] font-medium">
+                No autonomous activity recorded yet. Run an operating cycle in the AI Command Center.
               </div>
-            </div>
-
-            <div className="flex items-start gap-3 text-xs">
-              <span className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
-                ✓
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-[var(--neu-text-primary)]">Formulated 7-day multi-channel content strategy</p>
-                <p className="text-[10px] text-[var(--neu-text-muted)]">Distributed across Instagram, Facebook, and LinkedIn with brand tone alignment.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 text-xs">
-              <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
-                ✓
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-[var(--neu-text-primary)]">Auto-scheduled upcoming week's approved posts</p>
-                <p className="text-[10px] text-[var(--neu-text-muted)]">Queued for publishing at peak audience presence times.</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 

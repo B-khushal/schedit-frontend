@@ -84,7 +84,7 @@ export function ActivityLogsView({ projectId }: ActivityLogsViewProps) {
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="neu-card p-5 rounded-2xl">
             <p className="text-[10px] font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider">30-Day AI Expenditure</p>
-            <p className="text-xl font-bold text-[var(--neu-text-primary)] mt-1.5">\${(usage.totalCostUsd || 0).toFixed(4)}</p>
+            <p className="text-xl font-bold text-[var(--neu-text-primary)] mt-1.5">₹{((Number(usage.totalCostUsd) || 0) * 83).toFixed(2)}</p>
           </div>
           <div className="neu-card p-5 rounded-2xl">
             <p className="text-[10px] font-bold text-[var(--neu-text-secondary)] uppercase tracking-wider">Total Input Tokens</p>
@@ -185,7 +185,7 @@ export function ActivityLogsView({ projectId }: ActivityLogsViewProps) {
                         </Badge>
                       </td>
                       <td className="py-3 px-4 text-[var(--neu-text-primary)] font-mono">
-                        {r.totalInputTokens + r.totalOutputTokens}t • \${(r.estimatedCostUsd || 0).toFixed(4)}
+                        {r.totalInputTokens + r.totalOutputTokens}t • ₹{((Number(r.estimatedCostUsd) || 0) * 83).toFixed(4)}
                       </td>
                       <td className="py-3 px-4 text-right font-mono text-[var(--neu-text-secondary)]">
                         {r.executionDurationMs ? `${(r.executionDurationMs / 1000).toFixed(1)}s` : 'N/A'}

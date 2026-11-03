@@ -186,7 +186,7 @@ export function Billing() {
             {invoices.map((inv: any) => (
               <tr key={inv.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 text-sm font-bold text-gray-700">{inv.id.slice(0, 8)}</td>
-                <td className="px-6 py-4 text-sm text-gray-800">${(inv.amount / 100).toFixed(2)}</td>
+                <td className="px-6 py-4 text-sm text-gray-800">₹{(inv.amount / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 <td className="px-6 py-4">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-150">
                     Paid
@@ -220,7 +220,7 @@ export function Billing() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-gray-800">${(inv.amount / 100).toFixed(2)}</span>
+                <span className="text-sm font-bold text-gray-800">₹{(inv.amount / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 <button className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 border border-gray-200 rounded-lg transition-colors cursor-pointer">
                   <Download className="w-4 h-4" />
                 </button>

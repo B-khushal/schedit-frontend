@@ -403,7 +403,7 @@ export function BusinessMemoryView({ projectId, onRefreshDashboard }: BusinessMe
               />
               <input
                 type="number"
-                placeholder="Price ($USD)"
+                placeholder="Price (₹ INR)"
                 value={newProductPrice}
                 onChange={(e) => setNewProductPrice(e.target.value === '' ? '' : Number(e.target.value))}
                 className="neu-input px-3.5 py-2 text-xs"
@@ -444,7 +444,7 @@ export function BusinessMemoryView({ projectId, onRefreshDashboard }: BusinessMe
                     <div>
                       <p className="font-bold text-xs text-[var(--neu-text-primary)]">{p.name}</p>
                       <p className="text-xs text-[var(--neu-text-secondary)] mt-0.5">
-                        {p.price != null ? `\$${p.price}` : 'Custom Pricing'} {p.offerDetails ? `• ${p.offerDetails}` : ''}
+                        {p.price != null ? `₹${Number(p.price).toLocaleString('en-IN')}` : 'Custom Pricing'} {p.offerDetails ? `• ${p.offerDetails}` : ''}
                       </p>
                     </div>
                     <button

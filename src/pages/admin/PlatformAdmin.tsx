@@ -1232,9 +1232,9 @@ export function PlatformAdmin() {
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-slate-500">Current Month Spend:</span>
                 <span className="text-sm font-black text-indigo-600">
-                  ${aiUsage?.currentMonthSpendUsd?.toFixed(2) || '0.00'}
+                  ₹{((aiUsage?.currentMonthSpendUsd || 0) * 83).toFixed(2)}
                 </span>
-                <span className="text-xs text-slate-400">/ ${aiConfig?.monthlyCostCapUsd || 500}</span>
+                <span className="text-xs text-slate-400">/ ₹{((aiConfig?.monthlyCostCapUsd || 500) * 83).toLocaleString('en-IN')}</span>
               </div>
             </div>
 
@@ -1254,29 +1254,29 @@ export function PlatformAdmin() {
                 />
               </div>
               <div className="flex justify-between text-[11px] font-bold text-slate-400">
-                <span>$0.00</span>
+                <span>₹0.00</span>
                 <span>
                   {Math.round(
                     ((aiUsage?.currentMonthSpendUsd || 0) / (aiConfig?.monthlyCostCapUsd || 500)) * 100
                   )}% of Monthly Cap Utilized
                 </span>
-                <span>${aiConfig?.monthlyCostCapUsd || 500}.00 Cap</span>
+                <span>₹{((aiConfig?.monthlyCostCapUsd || 500) * 83).toLocaleString('en-IN')} Cap</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-[var(--neu-text-primary)] block">
-                  Monthly Platform Cost Cap ($ USD)
+                  Monthly Platform Cost Cap (₹ INR)
                 </label>
                 <div className="flex gap-3">
                   <input
                     type="number"
-                    defaultValue={aiConfig?.monthlyCostCapUsd || 500}
-                    onBlur={(e) => handleUpdateAiConfig({ monthlyCostCapUsd: Number(e.target.value) })}
+                    defaultValue={aiConfig?.monthlyCostCapUsd ? Math.round(aiConfig.monthlyCostCapUsd * 83) : 40000}
+                    onBlur={(e) => handleUpdateAiConfig({ monthlyCostCapUsd: Number(e.target.value) / 83 })}
                     className="neu-input w-full p-2.5 text-xs font-bold rounded-xl"
                   />
-                  <span className="text-xs font-bold text-slate-500 self-center">USD</span>
+                  <span className="text-xs font-bold text-slate-500 self-center">INR</span>
                 </div>
               </div>
 
@@ -1323,7 +1323,7 @@ export function PlatformAdmin() {
               <div className="neu-well p-5 rounded-2xl space-y-1">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Spend (30d)</span>
                 <p className="text-2xl font-black text-indigo-600">
-                  ${aiUsage?.totalCostUsd?.toFixed(4) || '0.0000'}
+                  ₹{((aiUsage?.totalCostUsd || 0) * 83).toFixed(2)}
                 </p>
               </div>
 
@@ -1363,7 +1363,7 @@ export function PlatformAdmin() {
                         <div className="flex items-center gap-4 text-slate-500 font-mono text-[11px]">
                           <span>{data.count} calls</span>
                           <span>{data.tokens.toLocaleString()} tok</span>
-                          <span className="font-bold text-indigo-600">${data.cost.toFixed(4)}</span>
+                          <span className="font-bold text-indigo-600">₹{(data.cost * 83).toFixed(2)}</span>
                         </div>
                       </div>
                     ))}
@@ -1380,7 +1380,7 @@ export function PlatformAdmin() {
                         <span className="font-bold text-[var(--neu-text-primary)]">{feat}</span>
                         <div className="flex items-center gap-4 text-slate-500 font-mono text-[11px]">
                           <span>{data.count} calls</span>
-                          <span className="font-bold text-indigo-600">${data.cost.toFixed(4)}</span>
+                          <span className="font-bold text-indigo-600">₹{(data.cost * 83).toFixed(2)}</span>
                         </div>
                       </div>
                     ))}

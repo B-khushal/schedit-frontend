@@ -34,7 +34,7 @@ export function AdsCommandCenterView({ projectId, onRefreshDashboard }: AdsComma
   const [showDraftModal, setShowDraftModal] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [draftObjective, setDraftObjective] = useState('OUTCOME_LEADS');
-  const [draftBudget, setDraftBudget] = useState(25);
+  const [draftBudget, setDraftBudget] = useState(1000);
   const [isCreatingDraft, setIsCreatingDraft] = useState(false);
 
   const fetchAdsData = async () => {
@@ -143,15 +143,15 @@ export function AdsCommandCenterView({ projectId, onRefreshDashboard }: AdsComma
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
           title="Current Month Spend"
-          value={`\$${totalSpend.toFixed(2)}`}
-          change={`Cap: \$${guardrail?.monthlySpendingCap || 500}`}
-          changeType={totalSpend < (guardrail?.monthlySpendingCap || 500) * 0.8 ? 'positive' : 'warning'}
+          value={`₹${totalSpend.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          change={`Cap: ₹${(guardrail?.monthlySpendingCap || 40000).toLocaleString('en-IN')}`}
+          changeType={totalSpend < (guardrail?.monthlySpendingCap || 40000) * 0.8 ? 'positive' : 'warning'}
         />
         <KPICard
           title="Active Daily Budget"
-          value={`\$${totalDailyBudget.toFixed(2)}`}
-          change={`Daily Cap: \$${guardrail?.dailySpendingCap || 50}`}
-          changeType={totalDailyBudget <= (guardrail?.dailySpendingCap || 50) ? 'positive' : 'warning'}
+          value={`₹${totalDailyBudget.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          change={`Daily Cap: ₹${(guardrail?.dailySpendingCap || 4000).toLocaleString('en-IN')}`}
+          changeType={totalDailyBudget <= (guardrail?.dailySpendingCap || 4000) ? 'positive' : 'warning'}
         />
         <KPICard
           title="Target Min ROAS"
@@ -222,14 +222,14 @@ export function AdsCommandCenterView({ projectId, onRefreshDashboard }: AdsComma
                         </Badge>
                       </td>
                       <td className="py-3.5 px-4 font-bold text-[var(--neu-text-primary)]">
-                        \${(camp.dailyBudget || 0).toFixed(2)}/day
+                        ₹{(camp.dailyBudget || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/day
                       </td>
                       <td className="py-3.5 px-4 text-[var(--neu-text-secondary)]">
-                        \${(camp.currentSpend || 0).toFixed(2)}
+                        ₹{(camp.currentSpend || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td className="py-3.5 px-4">
                         <span className="font-bold text-emerald-600">{m.roas ? `${m.roas}x` : 'N/A'}</span>
-                        {m.cpa ? <span className="text-[var(--neu-text-secondary)] ml-1">(\${m.cpa})</span> : null}
+                        {m.cpa ? <span className="text-[var(--neu-text-secondary)] ml-1">(₹{m.cpa})</span> : null}
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         {camp.status === 'ACTIVE' && (
@@ -292,11 +292,11 @@ export function AdsCommandCenterView({ projectId, onRefreshDashboard }: AdsComma
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[var(--neu-text-secondary)] mb-1.5">Daily Budget ($USD)</label>
+                <label className="block text-xs font-bold text-[var(--neu-text-secondary)] mb-1.5">Daily Budget (₹ INR)</label>
                 <input
                   type="number"
-                  min={5}
-                  max={guardrail?.dailySpendingCap || 50}
+                  min={100}
+                  max={guardrail?.dailySpendingCap || 4000}
                   value={draftBudget}
                   onChange={(e) => setDraftBudget(Number(e.target.value))}
                   className="neu-input w-full px-3.5 py-2 text-xs"
@@ -306,7 +306,7 @@ export function AdsCommandCenterView({ projectId, onRefreshDashboard }: AdsComma
 
             <div className="neu-well p-3 rounded-xl text-xs text-[var(--neu-text-secondary)] flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Hard financial cap is \${guardrail?.dailySpendingCap || 50}/day. AI cannot exceed this limit.</span>
+              <span>Hard financial cap is ₹{(guardrail?.dailySpendingCap || 4000).toLocaleString('en-IN')}/day. AI cannot exceed this limit.</span>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
